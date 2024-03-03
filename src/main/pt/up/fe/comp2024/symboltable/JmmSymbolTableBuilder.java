@@ -101,8 +101,6 @@ public class JmmSymbolTableBuilder {
 
 
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
-        // TODO: Simple implementation that needs to be expanded
-
         return methodDecl.getChildren(VAR_DECL).stream()
                 .map(varDecl -> {
                     String type = varDecl.getChild(0).get("name");
