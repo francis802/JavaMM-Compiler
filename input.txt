@@ -1,7 +1,9 @@
+import M;
+
 class App {
 
 	int foo() {
-		return c;
+		return 0;
 	}
 
 }

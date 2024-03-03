@@ -17,17 +17,20 @@ public class JmmSymbolTableBuilder {
     //TODO: For now, the language doesn't support arrays
 
     public static JmmSymbolTable build(JmmNode root) {
-
-        var classDecl = root.getJmmChild(0);
+        var classDecl = root.getJmmChild(root.getNumChildren()-1);
+        System.out.println(classDecl);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("classname");
+        String superclass = ""; //TODO: IMPLEMENT SUPERCLASS
 
+        var imports = buildImports(root);
         var methods = buildMethods(classDecl);
+        var fields = buildFields(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
         var params = buildParams(classDecl);
         var locals = buildLocals(classDecl);
 
-        return new JmmSymbolTable(className, methods, returnTypes, params, locals);
+        return new JmmSymbolTable(className, superclass, imports, fields, methods, returnTypes, params, locals);
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
@@ -106,6 +109,20 @@ public class JmmSymbolTableBuilder {
                     String type = varDecl.getChild(0).get("name");
                     return new Symbol(new Type(type, false), varDecl.get("name"));
                 }).toList();
+    }
+
+    private static List<Symbol> buildFields(JmmNode classDecl) {
+        //TODO: For now, the language doesn't support fields
+        List<Symbol> list = new ArrayList<>();
+
+        return list;
+    }
+
+    private static List<String> buildImports(JmmNode programDecl) {
+        //TODO: For now, the language doesn't support imports
+        List<String> list = new ArrayList<>();
+
+        return list;
     }
 
 }
