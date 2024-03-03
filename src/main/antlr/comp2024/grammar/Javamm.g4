@@ -43,7 +43,7 @@ importDecl
     ;
 
 classDecl
-    : CLASS classname=ID ('extends' extendedname=ID)? LCURLY varDecl* methodDecl* RCURLY #ClassStmt;
+    : CLASS classname=ID ('extends' extendedname=ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl
     : type name=ID SEMI;
@@ -61,7 +61,7 @@ type
 
 
 methodDecl locals[boolean isPublic=false]
-    : (PUBLIC {$isPublic=true;})? type name=ID LPAREN param RPAREN LCURLY varDecl* stmt* RCURLY
+    : (PUBLIC {$isPublic=true;})? type name=ID LPAREN param? RPAREN LCURLY varDecl* stmt* RCURLY
     | (PUBLIC {$isPublic=true;})? 'static' 'void' 'main'LPAREN STRING '[' ']' name=ID RPAREN LCURLY (varDecl)* (stmt)* RCURLY
     ;
 

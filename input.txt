@@ -1,0 +1,7 @@
+class App {
+
+	int foo() {
+		return c;
+	}
+
+}

@@ -7,13 +7,9 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
-import static pt.up.fe.comp2024.ast.Kind.VAR_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
@@ -22,7 +18,7 @@ public class JmmSymbolTableBuilder {
 
         var classDecl = root.getJmmChild(0);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
-        String className = classDecl.get("name");
+        String className = classDecl.get("classname");
 
         var methods = buildMethods(classDecl);
         var returnTypes = buildReturnTypes(classDecl);
@@ -44,16 +40,32 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildParams(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
 
         Map<String, List<Symbol>> map = new HashMap<>();
 
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
+        classDecl.getChildren(METHOD_DECL).forEach(method -> {
+            List<Symbol> symbols = new ArrayList<>();
 
-        classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), Arrays.asList(new Symbol(intType, method.getJmmChild(1).get("name")))));
+            if(!method.getChildren(PARAM).isEmpty()){
+                String varName = method.getChildren().get(1).get("name");
+                symbols = getParamsList(method.getChildren().get(1), symbols, varName);
+            }
+
+            map.put(method.get("name"), symbols);
+        });
 
         return map;
+    }
+
+    private static List<Symbol> getParamsList(JmmNode paramDecl, List<Symbol> lst, String varName) {
+        lst.add(new Symbol(new Type(paramDecl.getChildren().get(0).get("name"), false), varName));
+        if (paramDecl.getNumChildren() == 1){
+            return lst;
+        }
+        else {
+            String varName2 = paramDecl.getChildren().get(1).get("name");
+            return getParamsList(paramDecl.getChildren().get(1), lst, varName2);
+        }
     }
 
     private static Map<String, List<Symbol>> buildLocals(JmmNode classDecl) {
