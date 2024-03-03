@@ -2,6 +2,9 @@ import M;
 
 class App {
 
+    int a;
+    float b;
+
 	int foo() {
 		return 0;
 	}

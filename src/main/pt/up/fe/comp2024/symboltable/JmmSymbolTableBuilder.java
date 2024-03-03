@@ -18,7 +18,6 @@ public class JmmSymbolTableBuilder {
 
     public static JmmSymbolTable build(JmmNode root) {
         var classDecl = root.getJmmChild(root.getNumChildren()-1);
-        System.out.println(classDecl);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("classname");
         String superclass = ""; //TODO: IMPLEMENT SUPERCLASS
@@ -112,9 +111,12 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<Symbol> buildFields(JmmNode classDecl) {
-        //TODO: For now, the language doesn't support fields
         List<Symbol> list = new ArrayList<>();
 
+        classDecl.getChildren(VAR_DECL).forEach(var -> {
+                    list.add(new Symbol(new Type(var.getChild(0).get("name"), false), var.get("name")));
+                });
+        System.out.println(list);
         return list;
     }
 
