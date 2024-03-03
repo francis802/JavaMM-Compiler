@@ -14,6 +14,7 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
+    //TODO: For now, the language doesn't support arrays
 
     public static JmmSymbolTable build(JmmNode root) {
 
@@ -49,8 +50,6 @@ public class JmmSymbolTableBuilder {
             map.put(method.get("name"), returnType);
         });
 
-        System.out.println(map);
-
         return map;
     }
 
@@ -84,8 +83,6 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, List<Symbol>> buildLocals(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
-
         Map<String, List<Symbol>> map = new HashMap<>();
 
 
@@ -106,11 +103,11 @@ public class JmmSymbolTableBuilder {
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
         // TODO: Simple implementation that needs to be expanded
 
-        var intType = new Type(TypeUtils.getIntTypeName(), false);
-
         return methodDecl.getChildren(VAR_DECL).stream()
-                .map(varDecl -> new Symbol(intType, varDecl.get("name")))
-                .toList();
+                .map(varDecl -> {
+                    String type = varDecl.getChild(0).get("name");
+                    return new Symbol(new Type(type, false), varDecl.get("name"));
+                }).toList();
     }
 
 }
