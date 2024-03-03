@@ -49,14 +49,14 @@ varDecl
     : type name=ID SEMI;
 
 type
-    : type '[' ']' #Array //
-    | name= INT #Integer //
-    | name= DOUBLE #Double //
-    | name= FLOAT #Float //
-    | name= BOOLEAN #Boolean //
-    | name= STRING #String //
-    | 'int' '...' #ArrayExpected
-    | name = ID #ClassObject //
+    : type '[' ']'
+    | name= INT
+    | name= DOUBLE
+    | name= FLOAT
+    | name= BOOLEAN
+    | name= STRING
+    | 'int' '...'
+    | name = ID
     ;
 
 
