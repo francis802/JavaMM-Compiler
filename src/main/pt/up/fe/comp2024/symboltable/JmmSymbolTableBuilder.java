@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.symboltable;
 
+import org.antlr.v4.runtime.misc.Pair;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -29,12 +30,26 @@ public class JmmSymbolTableBuilder {
     }
 
     private static Map<String, Type> buildReturnTypes(JmmNode classDecl) {
-        // TODO: Simple implementation that needs to be expanded
-
         Map<String, Type> map = new HashMap<>();
 
-        classDecl.getChildren(METHOD_DECL).stream()
-                .forEach(method -> map.put(method.get("name"), new Type(TypeUtils.getIntTypeName(), false)));
+        classDecl.getChildren(METHOD_DECL).forEach(method -> {
+
+            Type returnType = null;
+
+            returnType = new Type(method.getJmmChild(0).get("name"), false);
+
+            // TODO: SE O TIPO FOR VOID
+            /*if(!method.getJmmChild(0).get("name").equals("void")) {
+                returnType = new Type(method.getJmmChild(0).get("name"), false);
+            }
+            else {
+                returnType = new Type("void", false);
+            } */
+
+            map.put(method.get("name"), returnType);
+        });
+
+        System.out.println(map);
 
         return map;
     }
