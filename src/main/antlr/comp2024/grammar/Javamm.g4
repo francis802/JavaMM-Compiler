@@ -43,7 +43,7 @@ importDecl
     ;
 
 classDecl
-    : CLASS classname=ID ('extends' extendedname=ID)? LCURLY varDecl* methodDecl* RCURLY;
+    : CLASS classname=ID ('extends' superclass=ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl
     : type name=ID SEMI;

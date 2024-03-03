@@ -20,7 +20,12 @@ public class JmmSymbolTableBuilder {
         var classDecl = root.getJmmChild(root.getNumChildren()-1);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("classname");
-        String superclass = ""; //TODO: IMPLEMENT SUPERCLASS
+        String superclass;
+        try{
+            superclass = classDecl.get("superclass");
+        } catch (NullPointerException e) {
+            superclass = "";
+        }
 
         var imports = buildImports(root);
         var methods = buildMethods(classDecl);
@@ -121,8 +126,10 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<String> buildImports(JmmNode programDecl) {
-        //TODO: For now, the language doesn't support imports
         List<String> list = new ArrayList<>();
+        for (int i=0; i<programDecl.getNumChildren()-1; i++) {
+            list.add(programDecl.getChild(i).get("name"));
+        }
 
         return list;
     }
