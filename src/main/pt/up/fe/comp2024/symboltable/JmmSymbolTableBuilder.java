@@ -14,17 +14,20 @@ import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class JmmSymbolTableBuilder {
 
-    //TODO: For now, the language doesn't support arrays
+    public static String arrayType(JmmNode type) {
+        if (!type.getAttributes().contains("name"))
+            return arrayType(type.getChild(0));
+        else return type.get("name");
+    }
 
     public static JmmSymbolTable build(JmmNode root) {
         var classDecl = root.getJmmChild(root.getNumChildren()-1);
         SpecsCheck.checkArgument(Kind.CLASS_DECL.check(classDecl), () -> "Expected a class declaration: " + classDecl);
         String className = classDecl.get("classname");
-        String superclass;
-        try{
+        String superclass = "";
+        List<String> attributes = classDecl.getAttributes().stream().toList();
+        if(attributes.contains("superclass")) {
             superclass = classDecl.get("superclass");
-        } catch (NullPointerException e) {
-            superclass = "";
         }
 
         var imports = buildImports(root);
@@ -42,17 +45,19 @@ public class JmmSymbolTableBuilder {
 
         classDecl.getChildren(METHOD_DECL).forEach(method -> {
 
-            Type returnType = null;
+            Type returnType;
 
-            returnType = new Type(method.getJmmChild(0).get("name"), false);
-
-            // TODO: SE O TIPO FOR VOID
-            /*if(!method.getJmmChild(0).get("name").equals("void")) {
-                returnType = new Type(method.getJmmChild(0).get("name"), false);
-            }
-            else {
+            // If the method has no children, it's a void method
+            if(method.getChildren().isEmpty())
                 returnType = new Type("void", false);
-            } */
+
+            else {
+                if (!method.getJmmChild(0).getAttributes().contains("name")) {
+                    returnType = new Type(arrayType(method.getJmmChild(0).getChild(0)), true);
+                } else {
+                    returnType = new Type(method.getJmmChild(0).get("name"), false);
+                }
+            }
 
             map.put(method.get("name"), returnType);
         });
@@ -79,7 +84,11 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<Symbol> getParamsList(JmmNode paramDecl, List<Symbol> lst, String varName) {
-        lst.add(new Symbol(new Type(paramDecl.getChildren().get(0).get("name"), false), varName));
+        if(!paramDecl.getChild(0).getAttributes().contains("name"))
+            lst.add(new Symbol(new Type(arrayType(paramDecl.getChild(0).getChild(0)), true), varName));
+        else
+            lst.add(new Symbol(new Type(paramDecl.getChild(0).get("name"), false), varName));
+
         if (paramDecl.getNumChildren() == 1){
             return lst;
         }
@@ -110,8 +119,16 @@ public class JmmSymbolTableBuilder {
     private static List<Symbol> getLocalsList(JmmNode methodDecl) {
         return methodDecl.getChildren(VAR_DECL).stream()
                 .map(varDecl -> {
-                    String type = varDecl.getChild(0).get("name");
-                    return new Symbol(new Type(type, false), varDecl.get("name"));
+                    boolean isArray = false;
+                    String type;
+                    if(!varDecl.getChild(0).getAttributes().contains("name")){
+                        isArray = true;
+                        type = arrayType(varDecl.getChild(0).getChild(0));
+                    }
+                    else
+                        type = varDecl.getChild(0).get("name");
+
+                    return new Symbol(new Type(type, isArray), varDecl.get("name"));
                 }).toList();
     }
 
@@ -119,9 +136,11 @@ public class JmmSymbolTableBuilder {
         List<Symbol> list = new ArrayList<>();
 
         classDecl.getChildren(VAR_DECL).forEach(var -> {
-                    list.add(new Symbol(new Type(var.getChild(0).get("name"), false), var.get("name")));
+                    if(!var.getChild(0).getAttributes().contains("name"))
+                        list.add(new Symbol(new Type(arrayType(var.getChild(0).getChild(0)), true), var.get("name")));
+                    else
+                        list.add(new Symbol(new Type(var.getChild(0).get("name"), false), var.get("name")));
                 });
-        System.out.println(list);
         return list;
     }
 
