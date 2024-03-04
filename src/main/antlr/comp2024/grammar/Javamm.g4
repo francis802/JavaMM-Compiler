@@ -39,7 +39,7 @@ program
 
 
 importDecl
-    : 'import' name=ID ('.' name=ID)* SEMI #ImportStmt
+    : 'import' name+=ID ('.' name+=ID)* SEMI #ImportStmt
     ;
 
 classDecl
@@ -48,21 +48,19 @@ classDecl
 varDecl
     : type name=ID SEMI;
 
-type
-    : type '[' ']'
-    | name= INT
+type locals[boolean isArray=false, boolean isVarArgs=false]
+    : name=INT ('[' ']' {$isArray=true;} | '...' {$isArray=true; $isVarArgs=true;})?
     | name= DOUBLE
     | name= FLOAT
     | name= BOOLEAN
     | name= STRING
-    | 'int' '...'
     | name = ID
     ;
 
 
-methodDecl locals[boolean isPublic=false]
+methodDecl locals[boolean isPublic=false, boolean isMain=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN param? RPAREN LCURLY varDecl* stmt* RCURLY
-    | (PUBLIC {$isPublic=true;})? 'static' 'void' 'main'LPAREN STRING '[' ']' name=ID RPAREN LCURLY (varDecl)* (stmt)* RCURLY
+    | (PUBLIC {$isPublic=true;})? 'static' 'void' name='main'LPAREN STRING '[' ']' arg=ID RPAREN LCURLY (varDecl)* (stmt)* RCURLY {$isMain=true;}
     ;
 
 
