@@ -124,12 +124,13 @@ public class JmmSymbolTableBuilder {
     }
 
     private static List<String> buildImports(JmmNode programDecl) {
-        List<String> list = new ArrayList<>();
+        List<String> imports = new ArrayList<>();
         for (int i=0; i<programDecl.getNumChildren()-1; i++) {
-            list.add(programDecl.getChild(i).get("name"));
+            List<String> lst = programDecl.getChild(i).getObjectAsList("name", String.class);
+            String importString = String.join(".", lst);
+            imports.add(importString);
         }
-
-        return list;
+        return imports;
     }
 
 }

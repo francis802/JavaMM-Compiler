@@ -39,7 +39,7 @@ program
 
 
 importDecl
-    : 'import' name=ID ('.' name=ID)* SEMI #ImportStmt
+    : 'import' name+=ID ('.' name+=ID)* SEMI #ImportStmt
     ;
 
 classDecl
