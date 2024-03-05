@@ -73,7 +73,7 @@ stmt
     : expr SEMI #ExprSmt //
     | LCURLY (stmt)* RCURLY #CurlyStmt //
     | RETURN expr SEMI #ReturnStmt //
-    | ifExpr (elseIfExpr)* (elseExpr)? #ConditionalStmt //
+    | ifExpr elseExpr #ConditionalStmt //
     | 'for' LPAREN stmt expr ';' expr RPAREN stmt #ForStmt //
     | 'while' LPAREN expr RPAREN stmt #WhileStmt //
     | expr EQUALS expr SEMI #AssignStmt //
@@ -82,9 +82,6 @@ stmt
 
 ifExpr
     : 'if' LPAREN expr RPAREN stmt;
-
-elseIfExpr
-    : 'else if' LPAREN expr RPAREN stmt;
 
 elseExpr
     : 'else' stmt;
