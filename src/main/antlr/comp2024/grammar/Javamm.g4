@@ -26,7 +26,6 @@ PUBLIC : 'public' ;
 VOID : 'void' ;
 STATIC : 'static' ;
 RETURN : 'return' ;
-MAIN : 'main' ;
 
 INTEGER : [0] | ([1-9][0-9]*) ;
 ID : [a-zA-Z_$]([a-zA-Z_$0-9])* ;
@@ -63,7 +62,7 @@ type locals[boolean isArray=false, boolean isVarArgs=false]
 
 methodDecl locals[boolean isPublic=false, boolean isMain=false]
     : (PUBLIC {$isPublic=true;})? type name=ID LPAREN param? RPAREN LCURLY varDecl* stmt* RCURLY
-    | (PUBLIC {$isPublic=true;})? STATIC VOID name=MAIN LPAREN STRING '[' ']' arg=ID RPAREN LCURLY (varDecl)* (stmt)* RCURLY {$isMain=true;}
+    | (PUBLIC {$isPublic=true;})? STATIC VOID name=ID LPAREN STRING '[' ']' arg=ID RPAREN LCURLY (varDecl)* (stmt)* RCURLY {$isMain=true;}
     ;
 
 
