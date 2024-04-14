@@ -7,6 +7,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
+import pt.up.fe.comp2024.analysis.passes.BinaryOperation;
 import pt.up.fe.comp2024.analysis.passes.UndeclaredVariable;
 import pt.up.fe.comp2024.symboltable.JmmSymbolTableBuilder;
 
@@ -14,23 +15,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JmmAnalysisImpl implements JmmAnalysis {
-
-
     private final List<AnalysisPass> analysisPasses;
 
     public JmmAnalysisImpl() {
-
-        this.analysisPasses = List.of(new UndeclaredVariable());
+        this.analysisPasses = List.of(new UndeclaredVariable(),
+                                      new BinaryOperation()
+        );
 
     }
 
     @Override
+    // the parser result contains the root JmmNode of the parsed code and the input configuration
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
-
         JmmNode rootNode = parserResult.getRootNode();
-
         SymbolTable table = JmmSymbolTableBuilder.build(rootNode);
-
         List<Report> reports = new ArrayList<>();
 
         // Visit all nodes in the AST
