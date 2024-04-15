@@ -4,6 +4,7 @@ import IO.stream.l.k;
 class MethodsAndFields{
 	int field1;
 	boolean field2;
+	IO out;
 
 	public int getField1(){
 		return field1;
@@ -17,6 +18,9 @@ class MethodsAndFields{
 
 	public static void main(String[] args){
 	    int a;
+	    M b;
+	    b = new M();
 	    a = 1;
+	    out.println(a);
 	}
 }
