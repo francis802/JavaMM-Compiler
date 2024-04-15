@@ -81,7 +81,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitReturn(JmmNode node, Void unused) {
-
         String methodName = node.getAncestor(METHOD_DECL).map(method -> method.get("name")).orElseThrow();
         Type retType = table.getReturnType(methodName);
 
@@ -132,7 +131,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(name);
 
         // param
-        if(node.getChildren().isEmpty()){
+        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")){
             code.append("(args.array.String)");
         } else {
             code.append("(");
@@ -149,7 +148,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
 
         // type
-        if(node.getChildren().isEmpty()){
+        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")){
             code.append(".V");
         }
         else {
@@ -158,13 +157,22 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         }
         code.append(L_BRACKET);
 
-
         // rest of its children stmts
         var afterParam = 2;
+
+        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")) {
+            afterParam = 0;
+        }
+
         for (int i = afterParam; i < node.getNumChildren(); i++) {
             var child = node.getJmmChild(i);
             var childCode = visit(child);
             code.append(childCode);
+        }
+
+        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")) {
+            code.append("ret.V");
+            code.append(END_STMT);
         }
 
         code.append(R_BRACKET);
@@ -202,8 +210,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(buildConstructor());
         code.append(R_BRACKET);
 
-        System.out.println(code.toString());
-
         return code.toString();
     }
 
@@ -216,7 +222,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitProgram(JmmNode node, Void unused) {
-
         StringBuilder code = new StringBuilder();
 
         node.getChildren().stream()
