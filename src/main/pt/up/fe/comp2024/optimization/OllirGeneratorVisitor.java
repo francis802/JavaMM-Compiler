@@ -7,6 +7,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.Objects;
+
 import static pt.up.fe.comp2024.ast.Kind.*;
 
 /**
@@ -130,12 +132,30 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(name);
 
         // param
-        var paramCode = visit(node.getJmmChild(1));
-        code.append("(" + paramCode + ")");
+        if(node.getChildren().isEmpty()){
+            code.append("()");
+        } else {
+            code.append("(");
+            var param = node.getJmmChild(1);
+            var firstParamCode = visit(param);
+            code.append(firstParamCode);
+            while (param.getNumChildren() > 1) {
+                code.append(", ");
+                param = param.getJmmChild(1);
+                firstParamCode = visit(param);
+                code.append(firstParamCode);
+            }
+            code.append(")");
+        }
 
         // type
-        var retType = OptUtils.toOllirType(node.getJmmChild(0));
-        code.append(retType);
+        if(node.getChildren().isEmpty()){
+            code.append(".V");
+        }
+        else {
+            var retType = OptUtils.toOllirType(node.getJmmChild(0));
+            code.append(retType);
+        }
         code.append(L_BRACKET);
 
 
