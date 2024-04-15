@@ -121,34 +121,40 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
+        boolean isMain = NodeUtils.getBooleanAttribute(node, "isMain", "false");
 
         if (isPublic) {
             code.append("public ");
         }
+        if (isMain) {
+            code.append("static ");
+        }
+
 
         // name
         var name = node.get("name");
         code.append(name);
 
         // param
-        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")){
+        if(isMain){
             code.append("(args.array.String)");
         } else {
             code.append("(");
-            var param = node.getJmmChild(1);
-            var firstParamCode = visit(param);
-            code.append(firstParamCode);
-            while (param.getNumChildren() > 1) {
-                code.append(", ");
-                param = param.getJmmChild(1);
-                firstParamCode = visit(param);
-                code.append(firstParamCode);
+
+            var params = node.getChildren(PARAM);
+            for (int i = 0; i < params.size(); i++) {
+                var param = params.get(i);
+                var paramCode = visit(param);
+                code.append(paramCode);
+                if (i < (params.size() - 1)) {
+                    code.append(", ");
+                }
             }
             code.append(")");
         }
 
         // type
-        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")){
+        if(isMain){
             code.append(".V");
         }
         else {
@@ -160,7 +166,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         // rest of its children stmts
         var afterParam = 2;
 
-        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")) {
+        if(node.getChildren(PARAM).isEmpty()) {
+            afterParam = 1;
+        }
+
+        if(isMain) {
             afterParam = 0;
         }
 
@@ -170,7 +180,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append(childCode);
         }
 
-        if(node.getChildren().isEmpty() || !Objects.equals(node.getJmmChild(0).getKind(), "Type")) {
+        if(isMain) {
             code.append("ret.V");
             code.append(END_STMT);
         }
@@ -180,6 +190,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         return code.toString();
     }
+
 
 
     private String visitClass(JmmNode node, Void unused) {
@@ -198,6 +209,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         for (var child : node.getChildren()) {
             var result = visit(child);
+            if(VAR_DECL.check(child)) {
+                var type = child.getJmmChild(0);
+                result = ".field " + child.get("name") + OptUtils.toOllirType(type) + ";";
+                code.append(NL);
+
+            }
 
             if (METHOD_DECL.check(child) && needNl) {
                 code.append(NL);
