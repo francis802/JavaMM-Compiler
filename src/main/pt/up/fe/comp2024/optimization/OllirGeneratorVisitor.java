@@ -133,7 +133,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         // param
         if(node.getChildren().isEmpty()){
-            code.append("()");
+            code.append("(args.array.String)");
         } else {
             code.append("(");
             var param = node.getJmmChild(1);
@@ -179,6 +179,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
 
         code.append(table.getClassName());
+        if(!Objects.equals(table.getSuper(), "")){
+            code.append(" extends ");
+            code.append(table.getSuper());
+        }
         code.append(L_BRACKET);
 
         code.append(NL);
@@ -197,6 +201,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
         code.append(buildConstructor());
         code.append(R_BRACKET);
+
+        System.out.println(code.toString());
 
         return code.toString();
     }
