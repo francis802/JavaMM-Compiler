@@ -4,26 +4,27 @@ import IO.stream.l.k;
 class MethodsAndFields{
 	int field1;
 	boolean field2;
-	MethodsAndFields field3;
+	IO out;
 
 	public int getField1(){
 		return field1;
 	}
 
 	public boolean getField2(){
+	    this.field2 = !true;
 		return field2;
 	}
 
-	public MethodsAndFields getField3(){
-		return field3;
-	}
 
-	public int[] all(int a, boolean b, MethodsAndFields maf){
-		int[] c;
-		return c;
-	}
 
 	public static void main(String[] args){
-
+	    int a;
+	    M b;
+	    boolean c;
+	    b = new M();
+	    out = new IO();
+	    a = 1;
+	    c = b.method1(a, a + 1, a);
+	    out.println(a);
 	}
 }

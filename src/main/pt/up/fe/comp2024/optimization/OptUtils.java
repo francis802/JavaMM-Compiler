@@ -44,10 +44,10 @@ public class OptUtils {
     }
 
     private static String toOllirType(String typeName) {
-
         String type = "." + switch (typeName) {
             case "int" -> "i32";
-            default -> throw new NotImplementedException(typeName);
+            case "boolean" -> "bool";
+            default -> typeName;
         };
 
         return type;
