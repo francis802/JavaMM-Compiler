@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.optimization.OllirExprResult;
 import pt.up.fe.comp2024.optimization.OptUtils;
 
+import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
+
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
@@ -51,8 +53,31 @@ public class TypeUtils {
 
 
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
-        // TODO: Simple implementation that needs to be expanded
-        return new Type(INT_TYPE_NAME, false);
+        JmmNode method;
+        if(varRefExpr.getAncestor(METHOD_DECL).isPresent()) {
+            method = varRefExpr.getAncestor(METHOD_DECL).get();
+            for (var local : table.getLocalVariables(method.get("name"))) {
+                if (local.getName().equals(varRefExpr.get("name"))) {
+                    return local.getType();
+                }
+            }
+            for (var param : table.getParameters(method.get("name"))) {
+                if (param.getName().equals(varRefExpr.get("name"))) {
+                    return param.getType();
+                }
+            }
+        }
+        for(var field: table.getFields()){
+            if (field.getName().equals(varRefExpr.get("name"))){
+                return field.getType();
+            }
+        }
+        for (var import_ : table.getImports()) {
+            if (import_.equals(varRefExpr.get("name"))) {
+                return new Type(import_, false);
+            }
+        }
+        throw new RuntimeException("Variable '" + varRefExpr.get("name") + "' not found in table");
     }
 
     private static Type getFieldExprType(JmmNode fieldCall, SymbolTable table) {

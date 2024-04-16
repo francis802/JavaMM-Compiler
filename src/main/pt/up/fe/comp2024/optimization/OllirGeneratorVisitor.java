@@ -52,10 +52,18 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         if (FIELD_CALL.check(node)) {
             return true;
         }
-        var method = node.getAncestor(METHOD_DECL).get();
-        for (var local: table.getLocalVariables(method.get("name"))) {
-            if (local.getName().equals(node.get("name"))) {
-                return false;
+        JmmNode method;
+        if(node.getAncestor(METHOD_DECL).isPresent()) {
+            method = node.getAncestor(METHOD_DECL).get();
+            for (var local : table.getLocalVariables(method.get("name"))) {
+                if (local.getName().equals(node.get("name"))) {
+                    return false;
+                }
+            }
+            for (var param : table.getParameters(method.get("name"))) {
+                if (param.getName().equals(node.get("name"))) {
+                    return false;
+                }
             }
         }
         for(var field: table.getFields()){
