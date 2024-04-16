@@ -147,7 +147,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitMethodDecl(JmmNode node, Void unused) {
-        System.out.println(node.getChildren().get(node.getNumChildren() - 1).getChildren());
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
