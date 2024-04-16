@@ -14,9 +14,11 @@ MUL : '*' ;
 DIV : '/' ;
 ADD : '+' ;
 SUB : '-' ;
+DOT : '.' ;
 
 
 CLASS : 'class' ;
+THIS : 'this' ;
 INT : 'int' ;
 DOUBLE : 'double' ;
 FLOAT : 'float' ;
@@ -41,7 +43,7 @@ program
 
 
 importDecl
-    : 'import' name+=ID ('.' name+=ID)* SEMI #ImportStmt
+    : 'import' name+=ID (DOT name+=ID)* SEMI #ImportStmt
     ;
 
 classDecl
@@ -94,7 +96,7 @@ expr
     | expr '[' expr ']' #ArraySubs //
     | 'new' type '[' expr ']' #ArrayDeclaration //
     | 'new' name=ID LPAREN (expr (',' expr)*)? RPAREN #ObjectDeclaration //
-    | expr '.' name=ID LPAREN (expr (',' expr)*)? RPAREN #FunctionCall //
+    | expr DOT name=ID LPAREN (expr (',' expr)*)? RPAREN #FunctionCall //
     | expr op= (MUL | DIV) expr #BinaryExpr //
     | expr op= (ADD | SUB) expr #BinaryExpr //
     | expr op=('*=' | '/=' | '*=' | '-=') expr #BinaryExpr //
@@ -104,10 +106,11 @@ expr
     | value=INTEGER #IntegerLiteral //
     | value='true' #TrueLiteral //
     | value='false' #FalseLiteral //
+    | value=THIS #Object //
+    | THIS DOT name=ID #FieldCall //
     | name=ID #VarRefExpr //
-    | value = 'this' #Object //
     | value = '!' expr #Negation //
-    | expr '.' 'length' #Length //
+    | expr DOT 'length' #Length //
     | '[' ( expr ( ',' expr )* )? ']' #DescribedArray
     ;
 
