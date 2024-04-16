@@ -19,7 +19,8 @@ public enum Kind {
     INTEGER_LITERAL,
     VAR_REF_EXPR,
     OBJECT_DECLARATION,
-    FUNCTION_CALL;
+    FUNCTION_CALL,
+    FIELD_CALL;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
