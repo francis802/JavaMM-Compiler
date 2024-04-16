@@ -11,6 +11,7 @@ class MethodsAndFields{
 	}
 
 	public boolean getField2(){
+	    this.field2 = !true;
 		return field2;
 	}
 

@@ -108,27 +108,20 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         if (isStaticRef){
             invoker.append("invokestatic(");
             invoker.append(varRef.get("name")).append(", ");
-            invoker.append(methodName);
-            for (int i = 1; i < node.getNumChildren(); i++) {
-                var child = visit(node.getJmmChild(i));
-                invoker.append(", ").append(child.getCode());
-                computation.append(child.getComputation());
-            }
-            invoker.append(")");
         }
         else {
             invoker.append("invokevirtual(");
             var varRefType = TypeUtils.getExprType(varRef, table);
             String varRefOllirType = OptUtils.toOllirType(varRefType);
             invoker.append(varRef.get("name")).append(varRefOllirType).append(", ");
-            invoker.append(methodName);
-            for (int i = 1; i < node.getNumChildren(); i++) {
-                var child = visit(node.getJmmChild(i));
-                invoker.append(", ").append(child.getCode());
-                computation.append(child.getComputation());
-            }
-            invoker.append(")");
         }
+        invoker.append(methodName);
+        for (int i = 1; i < node.getNumChildren(); i++) {
+            var child = visit(node.getJmmChild(i));
+            invoker.append(", ").append(child.getCode());
+            computation.append(child.getComputation());
+        }
+        invoker.append(")");
         StringBuilder code = new StringBuilder();
         code.append(invoker);
 
