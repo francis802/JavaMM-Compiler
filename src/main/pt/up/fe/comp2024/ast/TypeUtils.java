@@ -3,6 +3,8 @@ package pt.up.fe.comp2024.ast;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
+import pt.up.fe.comp2024.optimization.OllirExprResult;
+import pt.up.fe.comp2024.optimization.OptUtils;
 
 public class TypeUtils {
 
@@ -28,6 +30,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case FIELD_CALL -> getFieldExprType(expr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -50,6 +53,15 @@ public class TypeUtils {
     private static Type getVarExprType(JmmNode varRefExpr, SymbolTable table) {
         // TODO: Simple implementation that needs to be expanded
         return new Type(INT_TYPE_NAME, false);
+    }
+
+    private static Type getFieldExprType(JmmNode fieldCall, SymbolTable table) {
+        for(var field: table.getFields()){
+            if (field.getName().equals(fieldCall.get("name"))){
+                return field.getType();
+            }
+        }
+        throw new RuntimeException("Field '" + fieldCall.get("name") + "' not found in table");
     }
 
 
