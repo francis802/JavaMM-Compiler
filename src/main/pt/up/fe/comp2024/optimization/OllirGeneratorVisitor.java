@@ -48,35 +48,66 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         setDefaultVisit(this::defaultVisit);
     }
 
+    private boolean isFieldCall(JmmNode node) {
+        if (FIELD_CALL.check(node)) {
+            return true;
+        }
+        var method = node.getAncestor(METHOD_DECL).get();
+        for (var local: table.getLocalVariables(method.get("name"))) {
+            if (local.getName().equals(node.get("name"))) {
+                return false;
+            }
+        }
+        for(var field: table.getFields()){
+            if (field.getName().equals(node.get("name"))){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private String visitAssignStmt(JmmNode node, Void unused) {
-
-        var lhs = exprVisitor.visit(node.getJmmChild(0));
-        var rhs = exprVisitor.visit(node.getJmmChild(1));
-
         StringBuilder code = new StringBuilder();
-        // code to compute the children
-        code.append(lhs.getComputation());
-        code.append(rhs.getComputation());
+        if (isFieldCall(node.getJmmChild(0))) {
+            var rhs = exprVisitor.visit(node.getJmmChild(1));
+            code.append(rhs.getComputation());
+            Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+            String typeString = OptUtils.toOllirType(thisType);
+            code.append("putfield(this, ").append(node.getJmmChild(0).get("name")).append(typeString).append(", ");
+            code.append(rhs.getCode());
+            if(FUNCTION_CALL.check(node.getJmmChild(1))) {
+                code.append(typeString);
+            }
+            code.append(")").append(".V").append(END_STMT);
 
-        // code to compute self
-        // statement has type of lhs
-        Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
-        String typeString = OptUtils.toOllirType(thisType);
-
-
-        code.append(lhs.getCode());
-        code.append(SPACE);
-
-        code.append(ASSIGN);
-        code.append(typeString);
-        code.append(SPACE);
-        code.append(rhs.getCode());
-        if(FUNCTION_CALL.check(node.getJmmChild(1))) {
-            code.append(typeString);
         }
+        else {
+            var lhs = exprVisitor.visit(node.getJmmChild(0));
+            var rhs = exprVisitor.visit(node.getJmmChild(1));
+            // code to compute the children
+            code.append(lhs.getComputation());
+            code.append(rhs.getComputation());
 
-        code.append(END_STMT);
+            // code to compute self
+            // statement has type of lhs
+            Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+            String typeString = OptUtils.toOllirType(thisType);
+
+
+            code.append(lhs.getCode());
+            code.append(SPACE);
+
+            code.append(ASSIGN);
+            code.append(typeString);
+            code.append(SPACE);
+            code.append(rhs.getCode());
+            if(FUNCTION_CALL.check(node.getJmmChild(1))) {
+                code.append(typeString);
+            }
+
+            code.append(END_STMT);
+        }
 
         return code.toString();
     }

@@ -4,6 +4,7 @@ import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.ast.PreorderJmmVisitor;
+import pt.up.fe.comp.jmm.ollir.OllirUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(INTEGER_LITERAL, this::visitInteger);
         addVisit(OBJECT_DECLARATION, this::visitObjDecl);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
+        addVisit(FIELD_CALL, this::visitFieldCall);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -75,22 +77,53 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
 
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
-
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        for (var field: table.getFields()){
+            if (field.getName().equals(node.get("name"))){
+                var typeCode = OptUtils.toOllirType(field.getType());
+                var temp = OptUtils.getTemp();
+                computation.append(temp).append(typeCode).append(SPACE);
+                computation.append(ASSIGN).append(typeCode).append(SPACE);
+                computation.append("getfield(this, ").append(field.getName()).append(typeCode).append(")").append(typeCode).append(END_STMT);
+                code.append(temp).append(typeCode);
+                return new OllirExprResult(code.toString(), computation);
+            }
+        }
         var id = node.get("name");
         Type type = TypeUtils.getExprType(node, table);
         String ollirType = OptUtils.toOllirType(type);
 
-        String code = id + ollirType;
+        code.append(id).append(ollirType);
 
-        return new OllirExprResult(code);
+        return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitFieldCall(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        var field = TypeUtils.getExprType(node, table);
+        var typeCode = OptUtils.toOllirType(field);
+        var temp = OptUtils.getTemp();
+        computation.append(temp).append(typeCode).append(SPACE);
+        computation.append(ASSIGN).append(typeCode).append(SPACE);
+        computation.append("getfield(this, ").append(field.getName()).append(typeCode).append(")").append(typeCode).append(END_STMT);
+        code.append(temp).append(typeCode);
+        return new OllirExprResult(code.toString(), computation);
     }
 
     private OllirExprResult visitObjDecl(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        var temp = OptUtils.getTemp();
         var id = node.get("name");
+        var type = "." + id;
+        computation.append(temp).append(type).append(SPACE);
+        computation.append(ASSIGN).append(type).append(SPACE);
+        computation.append("new(").append(id).append(")").append(type).append(END_STMT);
 
-        String code = "new(" + id + ")." + id;
+        String code = temp + type;
 
-        return new OllirExprResult(code);
+        return new OllirExprResult(code, computation);
     }
 
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
