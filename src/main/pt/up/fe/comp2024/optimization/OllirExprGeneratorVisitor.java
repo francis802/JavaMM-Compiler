@@ -106,7 +106,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         String methodName = '"'+node.get("name")+'"';
         if (isStaticRef){
-            invoker.append("staticinvoke(");
+            invoker.append("invokestatic(");
             invoker.append(varRef.get("name")).append(", ");
             invoker.append(methodName);
             for (int i = 1; i < node.getNumChildren(); i++) {
