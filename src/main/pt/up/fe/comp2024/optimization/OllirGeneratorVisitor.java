@@ -70,8 +70,10 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(ASSIGN);
         code.append(typeString);
         code.append(SPACE);
-
         code.append(rhs.getCode());
+        if(FUNCTION_CALL.check(node.getJmmChild(1))) {
+            code.append(typeString);
+        }
 
         code.append(END_STMT);
 

@@ -18,7 +18,8 @@ public enum Kind {
     BINARY_EXPR,
     INTEGER_LITERAL,
     VAR_REF_EXPR,
-    OBJECT_DECLARATION;
+    OBJECT_DECLARATION,
+    FUNCTION_CALL;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);

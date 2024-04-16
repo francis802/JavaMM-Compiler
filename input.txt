@@ -19,8 +19,11 @@ class MethodsAndFields{
 	public static void main(String[] args){
 	    int a;
 	    M b;
+	    boolean c;
 	    b = new M();
+	    out = new IO();
 	    a = 1;
+	    c = b.method1(a, a + 1, a);
 	    out.println(a);
 	}
 }
