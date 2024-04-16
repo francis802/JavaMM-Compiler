@@ -43,6 +43,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(PARAM, this::visitParam);
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
+        addVisit(FUNCTION_CALL, this::visitFunctionCall);
 
         setDefaultVisit(this::defaultVisit);
     }
@@ -72,6 +73,34 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append(SPACE);
         code.append(rhs.getCode());
         if(FUNCTION_CALL.check(node.getJmmChild(1))) {
+            code.append(typeString);
+        }
+
+        code.append(END_STMT);
+
+        return code.toString();
+    }
+
+    private String visitFunctionCall(JmmNode node, Void unused) {
+        var func = exprVisitor.visit(node);
+
+        StringBuilder code = new StringBuilder();
+        code.append(func.getComputation());
+
+        Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        String typeString = OptUtils.toOllirType(thisType);
+
+        code.append(func.getCode());
+        boolean isStatic = false;
+        for (var import_ : table.getImports()) {
+            if (import_.contains(node.get("name"))) {
+                isStatic = true;
+                break;
+            }
+        }
+        if(isStatic) {
+            code.append(".V");
+        } else {
             code.append(typeString);
         }
 
@@ -118,7 +147,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private String visitMethodDecl(JmmNode node, Void unused) {
-
+        System.out.println(node.getChildren().get(node.getNumChildren() - 1).getChildren());
         StringBuilder code = new StringBuilder(".method ");
 
         boolean isPublic = NodeUtils.getBooleanAttribute(node, "isPublic", "false");
@@ -257,11 +286,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
      * @return
      */
     private String defaultVisit(JmmNode node, Void unused) {
-
+        StringBuilder code = new StringBuilder();
         for (var child : node.getChildren()) {
-            visit(child);
+            code.append(visit(child));
         }
 
-        return "";
+        return code.toString();
     }
 }
