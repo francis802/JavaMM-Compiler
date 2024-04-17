@@ -37,8 +37,6 @@ public class BinaryOperation extends AnalysisVisitor {
 
         Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
         Type secOperandType = TypeUtils.getExprType(secOperand, table);
-        System.out.println("First Operand: " + firstOperandType.getName());
-        System.out.println("Second Operand: " + secOperandType.getName());
 
 
         if (Objects.equals(firstOperandType.getName(), "")) {
@@ -111,7 +109,7 @@ public class BinaryOperation extends AnalysisVisitor {
         }
 
         if(op.equals("<") || op.equals(">") || op.equals("<=") || op.equals(">=") || op.equals("==") || op.equals("!=")) {
-            if(!Objects.equals(firstOperandType.getName(),"int")  || !Objects.equals(secOperandType.getName(),"int") || firstOperand.get("isArray").equals("true") || secOperand.get("isArray").equals("true")) {
+            if(!Objects.equals(firstOperandType.getName(),"int")  || !Objects.equals(secOperandType.getName(),"int") || firstOperandType.isArray() || secOperandType.isArray()) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(binaryExpr),

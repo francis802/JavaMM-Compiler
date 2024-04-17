@@ -32,10 +32,6 @@ public class Assignment extends AnalysisVisitor {
         JmmNode left = assignment.getJmmChild(0);
         JmmNode right = assignment.getJmmChild(1);
 
-        System.out.println(left);
-        System.out.println(right);
-
-
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
 
