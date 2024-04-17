@@ -21,6 +21,7 @@ public class ArrayAccess extends AnalysisVisitor {
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.VAR_REF_EXPR, this::visitArrayAccess);
+        addVisit(Kind.DESCRIBED_ARRAY, this::visitArrayDescribed);
         addVisit(Kind.TYPE, this::visitArrayIndex);
         //addVisit(Kind.TYPE, this::visitArrayIndex);
     }
@@ -59,6 +60,34 @@ public class ArrayAccess extends AnalysisVisitor {
     }
 
     private Void visitArrayIndex(JmmNode array, SymbolTable table) {
+        return null;
+    }
+
+    private Void visitArrayDescribed(JmmNode array, SymbolTable table) {
+        Type arrayType = TypeUtils.getExprType(array, table);
+        for (JmmNode child : array.getChildren()) {
+            Type childType = TypeUtils.getExprType(child, table);
+            if (Objects.equals(childType.getName(), "")) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(child),
+                        NodeUtils.getColumn(child),
+                        "Var is not defined!",
+                        null)
+                );
+                return null;
+            }
+            if (!Objects.equals(childType.getName(), arrayType.getName())) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(child),
+                        NodeUtils.getColumn(child),
+                        "Array was assigned with different types!",
+                        null)
+                );
+                return null;
+            }
+        }
         return null;
     }
 

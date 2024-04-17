@@ -61,15 +61,38 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
-        if (!leftType.equals(rightType)) {
+        if (leftType.isArray() != rightType.isArray()) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignment),
                     NodeUtils.getColumn(assignment),
-                    "Assigning non-valid value to variable " + left.get("name"),
+                    leftType.isArray() ? "Left Var is an array and Right Var is not!" : "Right Var is an array and Left Var is not!",
                     null)
             );
             return null;
+        }
+        if(!Objects.equals(leftType.getName(), rightType.getName())){
+            if (!table.getImports().contains(rightType.getName()) && !table.getImports().contains(leftType.getName())) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assignment),
+                        NodeUtils.getColumn(assignment),
+                        "Assigning to variable" + leftType.getName() + " from variable " + rightType.getName() + " of different types!",
+                        null)
+                );
+                return null;
+            }
+            if (table.getImports().contains(leftType.getName()) && rightType.getName().equals(table.getClassName()) && !table.getSuper().equals(leftType.getName())) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assignment),
+                        NodeUtils.getColumn(assignment),
+                        "Assigning class instance to imported class object, but class isn't extended class of imported!",
+                        null)
+                );
+                return null;
+            }
+
         }
 
         return null;
