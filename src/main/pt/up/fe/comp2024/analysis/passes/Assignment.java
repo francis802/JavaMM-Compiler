@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 
 import java.util.Objects;
 
@@ -30,44 +31,8 @@ public class Assignment extends AnalysisVisitor {
         JmmNode left = assignment.getJmmChild(0);
         JmmNode right = assignment.getJmmChild(1);
 
-        Type leftType = new Type("unknown", false);
-        Type rightType = new Type("unknown", false);
-
-        System.out.println(left);
-        System.out.println(right);
-
-        for (var field: table.getFields()) {
-            //if(table.getFields().stream().anyMatch(param -> param.getName().equals(left.get("name")))) {
-            if (field.getName().equals(left.get("name"))) {
-                leftType = field.getType();
-            }
-
-            if (field.getName().equals(right.get("name"))) {
-                rightType = field.getType();
-            }
-        }
-
-        for (var variable: table.getLocalVariables(currentMethod)) {
-            //if(table.getFields().stream().anyMatch(param -> param.getName().equals(left.get("name")))) {
-            if (variable.getName().equals(left.get("name"))) {
-                leftType = variable.getType();
-            }
-
-            if (variable.getName().equals(right.get("name"))) {
-                rightType = variable.getType();
-            }
-        }
-
-        if (Objects.equals(leftType.getName(), "unknown")) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(assignment),
-                    NodeUtils.getColumn(assignment),
-                    "Var is not defined!",
-                    null)
-            );
-            return null;
-        }
+        Type leftType = TypeUtils.getExprType(left, table);
+        Type rightType = TypeUtils.getExprType(right, table);
 
         if (Objects.equals(rightType.getName(), "unknown")) {
             addReport(Report.newError(

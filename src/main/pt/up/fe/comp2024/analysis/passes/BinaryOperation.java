@@ -9,6 +9,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.List;
@@ -34,28 +35,8 @@ public class BinaryOperation extends AnalysisVisitor {
 
         String op = binaryExpr.get("op");
 
-        Type firstOperandType = new Type("unknown", false);
-        Type secOperandType = new Type("unknown", false);
-
-        for (var field: table.getFields()) {
-            if (field.getName().equals(firstOperand.get("name"))) {
-                firstOperandType = field.getType();
-            }
-
-            if (field.getName().equals(secOperand.get("name"))) {
-                secOperandType = field.getType();
-            }
-        }
-
-        for (var variable: table.getLocalVariables(currentMethod)) {
-            if (variable.getName().equals(firstOperand.get("name"))) {
-                firstOperandType = variable.getType();
-            }
-
-            if (variable.getName().equals(secOperand.get("name"))) {
-                secOperandType = variable.getType();
-            }
-        }
+        Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
+        Type secOperandType = TypeUtils.getExprType(firstOperand, table);
 
 
         if (Objects.equals(firstOperandType.getName(), "unknown")) {

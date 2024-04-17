@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.Objects;
@@ -30,19 +31,7 @@ public class ArrayAccess extends AnalysisVisitor {
     }
 
     private Void visitArrayAccess(JmmNode accessedVar, SymbolTable table) {
-        //JmmNode usedAs = accessedVar.getParent();
-        Type accessedVarType = new Type("unknown", false);
-
-        for (var field: table.getFields()) {
-            if (field.getName().equals(accessedVar.get("name"))) {
-                accessedVarType = field.getType();
-            }
-        }
-        for (var variable: table.getLocalVariables(currentMethod)) {
-            if (variable.getName().equals(accessedVar.get("name"))) {
-                accessedVarType = variable.getType();
-            }
-        }
+        Type accessedVarType = TypeUtils.getExprType(accessedVar, table);
 
         if (Objects.equals(accessedVarType.getName(), "unknown")) {
             addReport(Report.newError(
