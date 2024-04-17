@@ -74,7 +74,7 @@ param
 
 
 stmt
-    : expr SEMI #ExprSmt //
+    : expr SEMI #ExprStmt //
     | LCURLY (stmt)* RCURLY #CurlyStmt //
     | RETURN expr SEMI #ReturnStmt //
     | ifExpr elseExpr #ConditionalStmt //

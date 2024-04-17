@@ -13,7 +13,7 @@ public enum Kind {
     TYPE,
     METHOD_DECL,
     PARAM,
-    STMT,
+    EXPR_STMT,
     ASSIGN_STMT,
     RETURN_STMT,
     BINARY_EXPR,
