@@ -10,6 +10,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.sql.SQLOutput;
 import java.util.Objects;
 
 public class Assignment extends AnalysisVisitor {
@@ -19,11 +20,11 @@ public class Assignment extends AnalysisVisitor {
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ASSIGN_STMT, this::visitVarAssign);
-        addVisit(Kind.ASSIGN_STMT, this::visitArrayAssign);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
         currentMethod = method.get("name");
+
         return null;
     }
 
@@ -31,15 +32,41 @@ public class Assignment extends AnalysisVisitor {
         JmmNode left = assignment.getJmmChild(0);
         JmmNode right = assignment.getJmmChild(1);
 
+        System.out.println(left);
+        System.out.println(right);
+
+
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
 
-        if (Objects.equals(rightType.getName(), "unknown")) {
+        if (Objects.equals(leftType.getName(), "")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignment),
                     NodeUtils.getColumn(assignment),
-                    "Var is not defined!",
+                    "Left Var is not defined!",
+                    null)
+            );
+            return null;
+        }
+
+        if (Objects.equals(rightType.getName(), "")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignment),
+                    NodeUtils.getColumn(assignment),
+                    "Right Var is not defined!",
+                    null)
+            );
+            return null;
+        }
+
+        if (!leftType.equals(rightType)) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignment),
+                    NodeUtils.getColumn(assignment),
+                    "Assigning non-valid value to variable " + left.get("name"),
                     null)
             );
             return null;

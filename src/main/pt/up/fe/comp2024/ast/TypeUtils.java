@@ -34,6 +34,8 @@ public class TypeUtils {
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case TRUE_LITERAL, FALSE_LITERAL -> new Type("boolean", false);
             case FIELD_CALL -> getFieldExprType(expr, table);
+            case FUNCTION_CALL -> getFunctionCallType(expr, table);
+            case OBJECT_DECLARATION -> new Type(expr.get("name"), false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -78,7 +80,7 @@ public class TypeUtils {
                 return new Type(import_, false);
             }
         }
-        throw new RuntimeException("Variable '" + varRefExpr.get("name") + "' not found in table");
+        return new Type("", false);
     }
 
     private static Type getFieldExprType(JmmNode fieldCall, SymbolTable table) {
@@ -88,6 +90,13 @@ public class TypeUtils {
             }
         }
         throw new RuntimeException("Field '" + fieldCall.get("name") + "' not found in table");
+    }
+
+    private static Type getFunctionCallType(JmmNode functionCall, SymbolTable table) {
+        if(Kind.ASSIGN_STMT.check(functionCall.getParent())){
+            return getVarExprType(functionCall.getParent().getJmmChild(0),table);
+        }
+        return 
     }
 
 
