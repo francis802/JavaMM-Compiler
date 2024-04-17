@@ -36,10 +36,12 @@ public class BinaryOperation extends AnalysisVisitor {
         String op = binaryExpr.get("op");
 
         Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
-        Type secOperandType = TypeUtils.getExprType(firstOperand, table);
+        Type secOperandType = TypeUtils.getExprType(secOperand, table);
+        System.out.println("First Operand: " + firstOperandType.getName());
+        System.out.println("Second Operand: " + secOperandType.getName());
 
 
-        if (Objects.equals(firstOperandType.getName(), "unknown")) {
+        if (Objects.equals(firstOperandType.getName(), "")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(binaryExpr),
@@ -50,7 +52,7 @@ public class BinaryOperation extends AnalysisVisitor {
             return null;
         }
 
-        if (Objects.equals(secOperandType.getName(), "unknown")) {
+        if (Objects.equals(secOperandType.getName(), "")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(binaryExpr),

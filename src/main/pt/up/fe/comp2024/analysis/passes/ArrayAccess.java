@@ -33,7 +33,7 @@ public class ArrayAccess extends AnalysisVisitor {
     private Void visitArrayAccess(JmmNode accessedVar, SymbolTable table) {
         Type accessedVarType = TypeUtils.getExprType(accessedVar, table);
 
-        if (Objects.equals(accessedVarType.getName(), "unknown")) {
+        if (Objects.equals(accessedVarType.getName(), "")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(accessedVar),

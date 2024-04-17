@@ -11,6 +11,7 @@ import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
 public class TypeUtils {
 
     private static final String INT_TYPE_NAME = "int";
+    private static final String BOOLEAN_TYPE_NAME = "boolean";
 
     public static String getIntTypeName() {
         return INT_TYPE_NAME;
@@ -36,6 +37,9 @@ public class TypeUtils {
             case FIELD_CALL -> getFieldExprType(expr, table);
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
             case OBJECT_DECLARATION -> new Type(expr.get("name"), false);
+            case ARRAY_DECLARATION -> new Type(expr.getJmmChild(0).get("name"), true);
+            case ARRAY_SUBS -> getExprType(expr.getJmmChild(0),table);
+            case DESCRIBED_ARRAY -> new Type(getExprType(expr.getJmmChild(0),table).getName(), true);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -48,7 +52,8 @@ public class TypeUtils {
         String operator = binaryExpr.get("op");
 
         return switch (operator) {
-            case "+", "*" -> new Type(INT_TYPE_NAME, false);
+            case "+", "*", "-", "/" -> new Type(INT_TYPE_NAME, false);
+            case "<", ">", "<=", ">=", "==", "!=", "&&", "||", "!" -> new Type(BOOLEAN_TYPE_NAME, false);
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
@@ -96,7 +101,7 @@ public class TypeUtils {
         if(Kind.ASSIGN_STMT.check(functionCall.getParent())){
             return getVarExprType(functionCall.getParent().getJmmChild(0),table);
         }
-        return 
+        return new Type("void",false);
     }
 
 

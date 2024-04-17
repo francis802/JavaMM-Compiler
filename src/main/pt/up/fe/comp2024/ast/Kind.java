@@ -23,7 +23,10 @@ public enum Kind {
     VAR_REF_EXPR,
     OBJECT_DECLARATION,
     FUNCTION_CALL,
-    FIELD_CALL;
+    FIELD_CALL,
+    ARRAY_DECLARATION,
+    ARRAY_SUBS,
+    DESCRIBED_ARRAY;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);
