@@ -32,6 +32,7 @@ public class TypeUtils {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
+            case TRUE_LITERAL, FALSE_LITERAL -> new Type("boolean", false);
             case FIELD_CALL -> getFieldExprType(expr, table);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
