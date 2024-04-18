@@ -140,7 +140,6 @@ public class JasminGenerator {
 
         if (classUnit.getSuperClass() != null){
             constructor.append( """
-                ;default constructor
                 .method public <init>()V
                     aload_0
                     invokespecial""").append(" " + classUnit.getSuperClass());
@@ -148,7 +147,6 @@ public class JasminGenerator {
         }
         else{
             constructor.append("""
-                ;default constructor
                 .method public <init>()V
                     aload_0
                     invokespecial java/lang/Object/<init>()V
@@ -253,18 +251,19 @@ public class JasminGenerator {
         var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
 
         // TODO: Hardcoded for int type, needs to be expanded
-        switch(lhs.getType().getTypeOfElement()) {
-            case INT32:
-            case BOOLEAN:
-                code.append("istore_").append(reg).append(NL);
-                break;
-            case STRING:
-            case ARRAYREF:
-                code.append("astore_").append(reg).append(NL);
-                break;
-            default:
-                break;
+        if(lhs.getType().getTypeOfElement() == ElementType.INT32 || lhs.getType().getTypeOfElement() == ElementType.BOOLEAN){
+            if(reg > 3){
+                code.append("istore ").append(reg).append(NL);
+            }
+            else code.append("istore_").append(reg).append(NL);
         }
+        else if(lhs.getType().getTypeOfElement() == ElementType.ARRAYREF || lhs.getType().getTypeOfElement() == ElementType.STRING || lhs.getType().getTypeOfElement() == ElementType.THIS || lhs.getType().getTypeOfElement() == ElementType.OBJECTREF){
+            if(reg > 3){
+                code.append("astore ").append(reg).append(NL);
+            }
+            else code.append("astore_").append(reg).append(NL);
+        }
+
 
         return code.toString();
     }
@@ -278,9 +277,7 @@ public class JasminGenerator {
     }
 
     private String generateOperand(Operand operand) {
-        // get register
-        var reg = currentMethod.getVarTable().get(operand.getName()).getVirtualReg();
-        return "iload_" + reg + NL;
+        return getOperatorCases(operand);
     }
 
     private String generateBinaryOp(BinaryOpInstruction binaryOp) {
@@ -401,8 +398,9 @@ public class JasminGenerator {
                 var s = getOperatorCases(op);
                 code.append(s);
             }
+                var o = ((Operand) call_instr.getOperands().get(0)).getName();
                 var p = ((LiteralElement)call_instr.getMethodName()).getLiteral().replace("\"", "");
-                code.append("invokestatic " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + p + "(" );
+                code.append("invokestatic " + o + "/" + p + "(" );
 
                 for(var arg : call_instr.getArguments()){
                     code.append(getFieldType(arg.getType()));
@@ -443,7 +441,7 @@ public class JasminGenerator {
                 }
                 break;
             case ldc:
-                code.append("ldc_").append(NL);
+                code.append("ldc ").append(NL);
                 break;
             default:
                 code.append("");
@@ -469,9 +467,9 @@ public class JasminGenerator {
                 } else if (int_literal >= -128 && int_literal <= 127) {
                     code.append("bipush ").append(int_literal);
                 } else if (int_literal >= -32768 && int_literal <= 32767) {
-                    code.append("sipush_").append(int_literal);
+                    code.append("sipush ").append(int_literal);
                 } else {
-                    code.append("ldc_").append(int_literal);
+                    code.append("ldc ").append(int_literal);
                 }
                 code.append(NL);
             }
@@ -479,14 +477,19 @@ public class JasminGenerator {
         }
         else if(element.getType().getTypeOfElement() == ElementType.INT32 || element.getType().getTypeOfElement() == ElementType.BOOLEAN){
             var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
-            code.append("iload_" + reg + NL);
+            if(reg > 3){
+                code.append("iload " + reg + NL);
+            }
+            else code.append("iload_" + reg + NL);
 
             return code.toString();
         }
         else if(element.getType().getTypeOfElement() == ElementType.OBJECTREF || element.getType().getTypeOfElement() == ElementType.STRING || element.getType().getTypeOfElement() == ElementType.ARRAYREF || element.getType().getTypeOfElement() == ElementType.THIS){
             var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
-            code.append("astore_").append(reg).append(NL);
-            code.append("aload " + reg + NL);
+            if(reg > 3){
+                code.append("aload " + reg + NL);
+            }
+            else code.append("aload_" + reg + NL);
 
             return code.toString();
         }
