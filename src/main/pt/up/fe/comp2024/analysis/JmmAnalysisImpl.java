@@ -23,7 +23,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                                       new Assignment(),
                                       new ConditionExpression(),
                                       new ThisDeclaration(),
-                                      new MethodCalls()
+                                      new MethodCalls(),
+                                      new ImportChecks()
         );
 
     }

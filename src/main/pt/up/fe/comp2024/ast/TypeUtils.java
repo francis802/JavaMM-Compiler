@@ -32,7 +32,7 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
-            case PARAM -> new Type(expr.getJmmChild(0).get("name"), expr.getJmmChild(0).get("isArray").equals("true"));
+            case VAR_DECL, PARAM -> new Type(expr.getJmmChild(0).get("name"), expr.getJmmChild(0).get("isArray").equals("true"));
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case TRUE_LITERAL, FALSE_LITERAL -> new Type("boolean", false);
             case FIELD_CALL -> getFieldExprType(expr, table);

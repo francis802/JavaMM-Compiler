@@ -8,8 +8,6 @@ class Varargs {
     }
 
     public int varargs(int... a) {
-        A wrong;
-        wrong = new A();
         return a[0];
     }
 }
