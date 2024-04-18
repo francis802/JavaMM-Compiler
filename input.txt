@@ -1,3 +1,4 @@
+import A.B.C;
 class Varargs {
 
     public int foo() {
@@ -7,6 +8,8 @@ class Varargs {
     }
 
     public int varargs(int... a) {
+        A wrong;
+        wrong = new A();
         return a[0];
     }
 }

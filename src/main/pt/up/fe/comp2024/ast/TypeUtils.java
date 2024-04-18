@@ -83,8 +83,10 @@ public class TypeUtils {
             }
         }
         for (var import_ : table.getImports()) {
-            if (import_.equals(varRefExpr.get("name"))) {
-                return new Type(import_, false);
+            var lst = import_.split("\\.");
+            String importName = lst[lst.length - 1];
+            if (importName.equals(varRefExpr.get("name"))) {
+                return new Type(importName, false);
             }
         }
         return new Type("", false);
@@ -104,7 +106,8 @@ public class TypeUtils {
         if (callerType.getName().equals("int") || callerType.getName().equals("boolean")){
             return new Type("", false);
         }
-        if (callerType.getName().equals(table.getClassName()) && !table.getImports().contains(table.getSuper())){
+        var importLst = table.getImports().stream().map(x -> x.split("\\.")[x.split("\\.").length - 1]).toList();
+        if (callerType.getName().equals(table.getClassName()) && !importLst.contains(table.getSuper())){
             var methods = functionCall.getAncestor(Kind.CLASS_DECL).get().getChildren(Kind.METHOD_DECL);
             for (var method : methods){
                 if (method.get("name").equals(functionCall.get("name"))){

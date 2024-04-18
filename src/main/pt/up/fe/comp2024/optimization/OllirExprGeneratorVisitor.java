@@ -148,7 +148,9 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         StringBuilder computation = new StringBuilder();
         boolean isStaticRef = false;
         for (var import_ : table.getImports()){
-            if (import_.equals(varRefName)){
+            var lst = import_.split("\\.");
+            String importName = lst[lst.length - 1];
+            if (importName.equals(varRefName)){
                 isStaticRef = true;
                 break;
             }

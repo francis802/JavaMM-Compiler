@@ -40,7 +40,9 @@ public class MethodCalls extends AnalysisVisitor {
         }
         Type callerType = TypeUtils.getExprType(funcCall.getJmmChild(0), table);
         for (var import_ : table.getImports()) {
-            if (import_.equals(callerType.getName())) {
+            var lst = import_.split("\\.");
+            String importName = lst[lst.length - 1];
+            if (importName.equals(callerType.getName())) {
                 return null;
             }
         }

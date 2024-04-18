@@ -67,8 +67,9 @@ public class Assignment extends AnalysisVisitor {
             );
             return null;
         }
+        var importLst = table.getImports().stream().map(x -> x.split("\\.")[x.split("\\.").length - 1]).toList();
         if(!Objects.equals(leftType.getName(), rightType.getName())){
-            if (!table.getImports().contains(rightType.getName()) && !table.getImports().contains(leftType.getName())) {
+            if (!importLst.contains(rightType.getName()) && !importLst.contains(leftType.getName())) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(assignment),
@@ -78,7 +79,7 @@ public class Assignment extends AnalysisVisitor {
                 );
                 return null;
             }
-            if (table.getImports().contains(leftType.getName()) && rightType.getName().equals(table.getClassName()) && !table.getSuper().equals(leftType.getName())) {
+            if (importLst.contains(leftType.getName()) && rightType.getName().equals(table.getClassName()) && !table.getSuper().equals(leftType.getName())) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(assignment),
