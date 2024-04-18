@@ -1,29 +1,12 @@
-import M;
-import IO;
+class Varargs {
 
-class MethodsAndFields{
-	int field1;
-	boolean field2;
-	IO out;
+    public int foo() {
+        int a;
+        a = this.varargs(10, 20, 30);
+        return a;
+    }
 
-	public int getField1(){
-		return field1;
-	}
-
-	public boolean getField2(){
-		return field2;
-	}
-
-
-
-	public static void main(String[] args){
-	    int a;
-	    M b;
-	    boolean c;
-	    b = new M();
-	    out = new IO();
-	    a = 1;
-	    c = b.method1(a, a + 1, a);
-	    out.println(a);
-	}
+    public int varargs(int... a) {
+        return a[0];
+    }
 }

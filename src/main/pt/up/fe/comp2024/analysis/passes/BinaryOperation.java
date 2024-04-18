@@ -38,26 +38,7 @@ public class BinaryOperation extends AnalysisVisitor {
         Type firstOperandType = TypeUtils.getExprType(firstOperand, table);
         Type secOperandType = TypeUtils.getExprType(secOperand, table);
 
-
-        if (Objects.equals(firstOperandType.getName(), "")) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(binaryExpr),
-                    NodeUtils.getColumn(binaryExpr),
-                    "Var is not defined!",
-                    null)
-            );
-            return null;
-        }
-
-        if (Objects.equals(secOperandType.getName(), "")) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(binaryExpr),
-                    NodeUtils.getColumn(binaryExpr),
-                    "Var is not defined!",
-                    null)
-            );
+        if (firstOperandType.getName().isEmpty() || secOperandType.getName().isEmpty()) {
             return null;
         }
 

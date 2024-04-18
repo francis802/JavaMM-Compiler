@@ -11,6 +11,7 @@ import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
 import pt.up.fe.comp2024.ast.TypeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MethodCalls extends AnalysisVisitor {
@@ -38,25 +39,34 @@ public class MethodCalls extends AnalysisVisitor {
             return null;
         }
         Type callerType = TypeUtils.getExprType(funcCall.getJmmChild(0), table);
-        System.out.println(callerType);
         for (var import_ : table.getImports()) {
             if (import_.equals(callerType.getName())) {
                 return null;
             }
         }
-        List<JmmNode> params = List.of();
+        List<JmmNode> paramLst = List.of();
         var methods = funcCall.getAncestor(Kind.CLASS_DECL).get().getChildren(Kind.METHOD_DECL);
         for (var method : methods){
             if (method.get("name").equals(funcCall.get("name"))){
-                params = method.getChildren(Kind.PARAM);
+                paramLst = method.getChildren(Kind.PARAM);
             }
         }
+        List<JmmNode> params = new ArrayList<>();
+        if (!paramLst.isEmpty()) {
+            var tempParam = paramLst.get(0);
+            params.add(tempParam);
+            while (tempParam.getChildren().size() == 2) {
+                params.add(tempParam.getJmmChild(1));
+                tempParam = tempParam.getJmmChild(1);
+            }
+        }
+        System.out.println(params);
         boolean varagsDetected = false;
         for (int i = 1; i < funcCall.getNumChildren(); i++) {
             Type argType = TypeUtils.getExprType(funcCall.getJmmChild(i), table);
             JmmNode param;
             if (!varagsDetected) {
-                if(i >= params.size()){
+                if(i > params.size()){
                     addReport(Report.newError(
                             Stage.SEMANTIC,
                             NodeUtils.getLine(funcCall),

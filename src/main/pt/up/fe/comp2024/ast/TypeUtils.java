@@ -39,8 +39,9 @@ public class TypeUtils {
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
             case OBJECT_DECLARATION -> new Type(expr.get("name"), false);
             case ARRAY_DECLARATION -> new Type(expr.getJmmChild(0).get("name"), true);
-            case ARRAY_SUBS -> getExprType(expr.getJmmChild(0),table);
+            case ARRAY_SUBS -> new Type(getExprType(expr.getJmmChild(0),table).getName(), false);
             case DESCRIBED_ARRAY -> new Type(getExprType(expr.getJmmChild(0),table).getName(), true);
+            case OBJECT -> new Type(table.getClassName(), false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 

@@ -34,16 +34,6 @@ public class ArrayAccess extends AnalysisVisitor {
     private Void visitArrayAccess(JmmNode accessedVar, SymbolTable table) {
         Type accessedVarType = TypeUtils.getExprType(accessedVar, table);
 
-        if (Objects.equals(accessedVarType.getName(), "")) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(accessedVar),
-                    NodeUtils.getColumn(accessedVar),
-                    "Var is not defined!",
-                    null)
-            );
-            return null;
-        }
 
         if(accessedVar.getParent().toString().equals("ArraySubs") && !accessedVarType.isArray()) {
             addReport(Report.newError(
@@ -67,16 +57,6 @@ public class ArrayAccess extends AnalysisVisitor {
         Type arrayType = TypeUtils.getExprType(array, table);
         for (JmmNode child : array.getChildren()) {
             Type childType = TypeUtils.getExprType(child, table);
-            if (Objects.equals(childType.getName(), "")) {
-                addReport(Report.newError(
-                        Stage.SEMANTIC,
-                        NodeUtils.getLine(child),
-                        NodeUtils.getColumn(child),
-                        "Var is not defined!",
-                        null)
-                );
-                return null;
-            }
             if (!Objects.equals(childType.getName(), arrayType.getName())) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
