@@ -20,7 +20,7 @@ public class ArrayAccess extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR_REF_EXPR, this::visitArrayAccess);
+        addVisit(Kind.ARRAY_SUBS, this::visitArrayAccess);
         addVisit(Kind.DESCRIBED_ARRAY, this::visitArrayDescribed);
         addVisit(Kind.TYPE, this::visitArrayIndex);
         //addVisit(Kind.TYPE, this::visitArrayIndex);
@@ -32,10 +32,12 @@ public class ArrayAccess extends AnalysisVisitor {
     }
 
     private Void visitArrayAccess(JmmNode accessedVar, SymbolTable table) {
-        Type accessedVarType = TypeUtils.getExprType(accessedVar, table);
+        Type accessedVarType = TypeUtils.getExprType(accessedVar.getJmmChild(0), table);
+        Type indexType = TypeUtils.getExprType(accessedVar.getJmmChild(1), table);
 
 
-        if(accessedVar.getParent().toString().equals("ArraySubs") && !accessedVarType.isArray()) {
+        if(!accessedVarType.isArray()) {
+            System.out.println(accessedVarType);
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(accessedVar),
@@ -45,11 +47,17 @@ public class ArrayAccess extends AnalysisVisitor {
             );
             return null;
         }
+        if(!Objects.equals(indexType.getName(), "int")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(accessedVar),
+                    NodeUtils.getColumn(accessedVar),
+                    "Index must be of type integer!",
+                    null)
+            );
+            return null;
+        }
 
-        return null;
-    }
-
-    private Void visitArrayIndex(JmmNode array, SymbolTable table) {
         return null;
     }
 
