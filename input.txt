@@ -1,17 +1,15 @@
 import A.B.C;
-class Varargs {
+class Varargs extends C {
 
     public int foo() {
         int a;
-        a = this.varargs(10, 20, 30);
+        a = this.varargs(10);
         return a;
     }
 
-    public int varargs(int... a) {
-        int v;
-        v = 0;
-        boolean b;
-        b = true;
-        return a[v];
+    public int varargs(int a) {
+        C c;
+        c = this;
+        return 0;
     }
 }

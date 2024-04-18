@@ -35,6 +35,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(TRUE_LITERAL, this::visitBoolean);
         addVisit(FALSE_LITERAL, this::visitBoolean);
         addVisit(OBJECT_DECLARATION, this::visitObjDecl);
+        addVisit(OBJECT, this::visitObjDecl);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
         addVisit(FIELD_CALL, this::visitFieldCall);
 
@@ -122,9 +123,14 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     }
 
     private OllirExprResult visitObjDecl(JmmNode node, Void unused) {
+        String id;
         StringBuilder computation = new StringBuilder();
         var temp = OptUtils.getTemp();
-        var id = node.get("name");
+        if (OBJECT.check(node)) {
+            id = table.getClassName();
+        } else {
+            id = node.get("name");
+        }
         var type = "." + id;
         computation.append(temp).append(type).append(SPACE);
         computation.append(ASSIGN).append(type).append(SPACE);
