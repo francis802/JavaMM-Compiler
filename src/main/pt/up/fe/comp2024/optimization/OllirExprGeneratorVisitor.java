@@ -138,10 +138,17 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
         StringBuilder invoker = new StringBuilder();
         var varRef = node.getJmmChild(0);
+        String varRefName;
+        if (OBJECT.check(varRef)){
+            varRefName = "this";
+        }
+        else {
+            varRefName = varRef.get("name");
+        }
         StringBuilder computation = new StringBuilder();
         boolean isStaticRef = false;
         for (var import_ : table.getImports()){
-            if (import_.equals(varRef.get("name"))){
+            if (import_.equals(varRefName)){
                 isStaticRef = true;
                 break;
             }
@@ -149,13 +156,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         String methodName = '"'+node.get("name")+'"';
         if (isStaticRef){
             invoker.append("invokestatic(");
-            invoker.append(varRef.get("name")).append(", ");
+            invoker.append(varRefName).append(", ");
         }
         else {
             invoker.append("invokevirtual(");
             var varRefType = TypeUtils.getExprType(varRef, table);
             String varRefOllirType = OptUtils.toOllirType(varRefType);
-            invoker.append(varRef.get("name")).append(varRefOllirType).append(", ");
+            invoker.append(varRefName).append(varRefOllirType).append(", ");
         }
         invoker.append(methodName);
         for (int i = 1; i < node.getNumChildren(); i++) {
@@ -165,7 +172,18 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
-        code.append(invoker);
+        if(BINARY_EXPR.check(node.getJmmParent())){
+            Type parentType = TypeUtils.getExprType(node.getJmmParent(), table);
+            String parentOllirType = OptUtils.toOllirType(parentType);
+            var temp = OptUtils.getTemp();
+            computation.append(temp).append(parentOllirType).append(SPACE);
+            computation.append(ASSIGN).append(parentOllirType).append(SPACE);
+            computation.append(invoker).append(parentOllirType).append(END_STMT);
+            code.append(temp).append(parentOllirType);
+        }
+        else {
+            code.append(invoker);
+        }
 
         return new OllirExprResult(code.toString(), computation);
     }
