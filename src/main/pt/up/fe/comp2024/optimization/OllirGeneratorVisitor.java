@@ -309,7 +309,6 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
     }
 
     private String visitExprStatement(JmmNode node, Void unused) {
-        System.out.println("Visiting statement: " + node.getKind());
         StringBuilder code = new StringBuilder();
         for (var child : node.getChildren()) {
             code.append(visit(child));

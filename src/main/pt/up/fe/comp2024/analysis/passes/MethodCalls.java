@@ -60,7 +60,6 @@ public class MethodCalls extends AnalysisVisitor {
                 tempParam = tempParam.getJmmChild(1);
             }
         }
-        System.out.println(params);
         boolean varagsDetected = false;
         for (int i = 1; i < funcCall.getNumChildren(); i++) {
             Type argType = TypeUtils.getExprType(funcCall.getJmmChild(i), table);
