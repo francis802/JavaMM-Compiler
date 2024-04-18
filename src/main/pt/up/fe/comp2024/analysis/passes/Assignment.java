@@ -34,6 +34,8 @@ public class Assignment extends AnalysisVisitor {
 
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
+        System.out.println("Left: " + leftType.getName());
+        System.out.println("Right: " + rightType.getName());
 
         if (Objects.equals(leftType.getName(), "")) {
             addReport(Report.newError(
@@ -85,6 +87,16 @@ public class Assignment extends AnalysisVisitor {
                         NodeUtils.getLine(assignment),
                         NodeUtils.getColumn(assignment),
                         "Assigning class instance to imported class object, but class isn't extended class of imported!",
+                        null)
+                );
+                return null;
+            }
+            if (leftType.getName().equals("int") || leftType.getName().equals("boolean")) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(assignment),
+                        NodeUtils.getColumn(assignment),
+                        "Assigning to primitive type variable not matching the type!",
                         null)
                 );
                 return null;
