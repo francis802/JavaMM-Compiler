@@ -380,7 +380,7 @@ public class JasminGenerator {
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
-
+                code.append(NL + "pop" + NL);
                 break;
 
             case invokestatic:
