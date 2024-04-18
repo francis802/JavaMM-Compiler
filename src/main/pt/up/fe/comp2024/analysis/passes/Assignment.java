@@ -34,8 +34,6 @@ public class Assignment extends AnalysisVisitor {
 
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
-        System.out.println("Left: " + leftType.getName());
-        System.out.println("Right: " + rightType.getName());
 
         if (Objects.equals(leftType.getName(), "")) {
             addReport(Report.newError(
