@@ -311,7 +311,10 @@ public class JasminGenerator {
         if(returnInst.hasReturnValue()){
             var return_val = generators.apply(returnInst.getOperand());
             code.append(return_val);
-            code.append("ireturn").append(NL);
+            if(returnInst.getReturnType().getTypeOfElement() == ElementType.INT32 || returnInst.getReturnType().getTypeOfElement() == ElementType.BOOLEAN) {
+                code.append("ireturn").append(NL);
+            }
+            else code.append("areturn").append(NL);
         }
         else{
             code.append("return").append(NL);
@@ -378,8 +381,7 @@ public class JasminGenerator {
                     var s = getOperatorCases(op);
                     code.append(s);
                 }
-                var a = ((LiteralElement)call_instr.getMethodName()).getLiteral().replace("\"", "");
-                code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + a + "(" );
+                code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "(" );
 
                 for(var arg : call_instr.getArguments()){
                     code.append(getFieldType(arg.getType()));
