@@ -1,5 +1,5 @@
 import M;
-import IO.stream.l.k;
+import IO;
 
 class MethodsAndFields{
 	int field1;

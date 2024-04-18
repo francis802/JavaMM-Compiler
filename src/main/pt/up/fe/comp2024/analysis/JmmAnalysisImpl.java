@@ -21,8 +21,9 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                                       new BinaryOperation(),
                                       new ArrayAccess(),
                                       new Assignment(),
-                                      new ConditionExpression()
-                                      //new ThisDeclaration(),
+                                      new ConditionExpression(),
+                                      new ThisDeclaration(),
+                                      new MethodCalls()
         );
 
     }

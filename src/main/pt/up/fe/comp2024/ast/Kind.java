@@ -28,7 +28,8 @@ public enum Kind {
     FIELD_CALL,
     ARRAY_DECLARATION,
     ARRAY_SUBS,
-    DESCRIBED_ARRAY;
+    DESCRIBED_ARRAY,
+    OBJECT;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);

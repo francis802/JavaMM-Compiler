@@ -17,7 +17,8 @@ public class ThisDeclaration extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.VAR_REF_EXPR, this::visitThisDecl);
+        addVisit(Kind.OBJECT, this::visitObjectCall);
+        addVisit(Kind.FIELD_CALL, this::visitFieldCall);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -25,10 +26,32 @@ public class ThisDeclaration extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitThisDecl(JmmNode thisDecl, SymbolTable table) {
-        System.out.println(currentMethod.get("name") + currentMethod.getChildren());
-
-
+    private Void visitObjectCall(JmmNode fieldCall, SymbolTable table) {
+        if (currentMethod.get("isMain").equals("true")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(fieldCall),
+                    NodeUtils.getColumn(fieldCall),
+                    "Cannot use 'this' in main method!",
+                    null)
+            );
+            return null;
+        }
         return null;
     }
+
+    private Void visitFieldCall(JmmNode functionCall, SymbolTable table) {
+        if (currentMethod.get("isMain").equals("true")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(functionCall),
+                    NodeUtils.getColumn(functionCall),
+                    "Cannot use 'this' in main method!",
+                    null)
+            );
+            return null;
+        }
+        return null;
+    }
+
 }

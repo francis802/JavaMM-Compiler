@@ -143,7 +143,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         } else {
             code.append(typeString);
         }
-
+        String tyoe = TypeUtils.getExprType(node, table).getName();
         code.append(END_STMT);
 
         return code.toString();

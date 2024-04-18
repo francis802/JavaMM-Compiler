@@ -6,7 +6,7 @@ import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.optimization.OllirExprResult;
 import pt.up.fe.comp2024.optimization.OptUtils;
 
-import static pt.up.fe.comp2024.ast.Kind.METHOD_DECL;
+import static pt.up.fe.comp2024.ast.Kind.*;
 
 public class TypeUtils {
 
@@ -32,6 +32,7 @@ public class TypeUtils {
         Type type = switch (kind) {
             case BINARY_EXPR -> getBinExprType(expr);
             case VAR_REF_EXPR -> getVarExprType(expr, table);
+            case PARAM -> new Type(expr.getJmmChild(0).get("name"), expr.getJmmChild(0).get("isArray").equals("true"));
             case INTEGER_LITERAL -> new Type(INT_TYPE_NAME, false);
             case TRUE_LITERAL, FALSE_LITERAL -> new Type("boolean", false);
             case FIELD_CALL -> getFieldExprType(expr, table);
@@ -98,10 +99,30 @@ public class TypeUtils {
     }
 
     private static Type getFunctionCallType(JmmNode functionCall, SymbolTable table) {
-        if(Kind.ASSIGN_STMT.check(functionCall.getParent())){
-            return getVarExprType(functionCall.getParent().getJmmChild(0),table);
+        Type callerType = getExprType(functionCall.getJmmChild(0), table);
+        if (callerType.getName().equals("int") || callerType.getName().equals("boolean")){
+            return new Type("", false);
         }
-        return new Type("void",false);
+        if (callerType.getName().equals(table.getClassName()) && !table.getImports().contains(table.getSuper())){
+            var methods = functionCall.getAncestor(Kind.CLASS_DECL).get().getChildren(Kind.METHOD_DECL);
+            for (var method : methods){
+                if (method.get("name").equals(functionCall.get("name"))){
+                    var typeNode = method.getJmmChild(0);
+                    return new Type(typeNode.get("name"), typeNode.get("isArray").equals("true"));
+                }
+            }
+            return new Type("", false);
+        }
+        else {
+            if (ASSIGN_STMT.check(functionCall.getParent())){
+                return getExprType(functionCall.getParent().getJmmChild(0), table);
+            }
+            if (RETURN_STMT.check(functionCall.getParent())){
+                var parMethod = functionCall.getAncestor(METHOD_DECL).get();
+                return table.getReturnType(parMethod.get("name"));
+            }
+            return new Type("void", false);
+        }
     }
 
 

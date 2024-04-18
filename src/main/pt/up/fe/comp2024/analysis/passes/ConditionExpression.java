@@ -48,7 +48,8 @@ public class ConditionExpression extends AnalysisVisitor {
         }
 
         if(condition.getKind().equals("BinaryExpr")) {
-            if (!(condition.get("op").equals("<") || condition.get("op").equals(">") || condition.get("op").equals("<=") || condition.get("op").equals(">=") || condition.get("op").equals("==") || condition.get("op").equals("!="))) {
+            var condType = TypeUtils.getExprType(condition, table);
+            if (!condType.getName().equals("boolean")) {
                 addReport(Report.newError(
                         Stage.SEMANTIC,
                         NodeUtils.getLine(statement),
