@@ -385,13 +385,18 @@ public class JasminGenerator {
 
             case invokestatic:
                 for(var op : call_instr.getOperands()){
-                var s = getOperatorCases(op);
-                code.append(s);
-            }
+                    var s = getOperatorCases(op);
+                    code.append(s);
+                }
                 var o = ((Operand) call_instr.getOperands().get(0)).getName();
-                var p = ((LiteralElement)call_instr.getMethodName()).getLiteral().replace("\"", "");
-                code.append("invokestatic " + o + "/" + p + "(" );
+                var class_name = getClassName(ollirResult.getOllirClass(), o);
 
+                if(call_instr.getCaller().getType().getTypeOfElement() == ElementType.THIS || call_instr.getCaller().getType().getTypeOfElement() == ElementType.OBJECTREF){
+                    code.append("invokestatic " + class_name + "/" +  ((LiteralElement) call_instr.getOperands().get(1)).getLiteral().replace("\"", ""));
+                }
+                else code.append("invokestatic " + o + "/" + ((LiteralElement) call_instr.getOperands().get(1)).getLiteral().replace("\"", ""));
+
+                code.append("(");
                 for(var arg : call_instr.getArguments()){
                     code.append(getFieldType(arg.getType()));
                 }
@@ -409,9 +414,15 @@ public class JasminGenerator {
                     var s = getOperatorCases(op);
                     code.append(s);
                 }
-                var k = ((LiteralElement)call_instr.getMethodName()).getLiteral().replace("\"", "");
-                code.append("invokevirtual " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + k + "(" );
+                var o1 = ((Operand) call_instr.getOperands().get(0)).getName();
+                var class_name1 = getClassName(ollirResult.getOllirClass(), o1);
 
+                if(call_instr.getCaller().getType().getTypeOfElement() == ElementType.THIS || call_instr.getCaller().getType().getTypeOfElement() == ElementType.OBJECTREF){
+                    code.append("invokevirtual " + class_name1 + "/" +  ((LiteralElement) call_instr.getOperands().get(1)).getLiteral().replace("\"", ""));
+                }
+                else code.append("invokvirtual " + o1 + "/" + ((LiteralElement) call_instr.getOperands().get(1)).getLiteral().replace("\"", ""));
+
+                code.append("(");
                 for(var arg : call_instr.getArguments()){
                     code.append(getFieldType(arg.getType()));
                 }
@@ -422,18 +433,16 @@ public class JasminGenerator {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
                 code.append(NL);
-
                 break;
 
             case NEW:
-                if(call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
-                    code.append("new ").append(((Operand) call_instr.getOperands().get(0)).getName()).append(NL);
-                    code.append("dup" + NL);
-                }
+                var ret_type = ((ClassType) call_instr.getReturnType()).getName();
+                code.append("new " + ret_type + NL + "dup" + NL);
                 break;
 
             case ldc:
-                code.append("ldc ").append(NL);
+                var first_op = call_instr.getOperands().get(0);
+                code.append(getOperatorCases(first_op)).append(NL);
                 break;
 
             default:
