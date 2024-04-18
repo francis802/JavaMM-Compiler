@@ -189,8 +189,6 @@ public class JasminGenerator {
 
         var is_static = method.isStaticMethod() ? "static " : "";
         // TODO: Hardcoded param types and return type, needs to be expanded
-        // (ParameterType)ReturnType
-
 
         code.append("\n.method ").append(is_static).append(modifier).append(methodName).append("(");
 
@@ -200,7 +198,6 @@ public class JasminGenerator {
         for(var param: method.getParams()){
             param_type.append(getFieldType(param.getType()));
         }
-        System.out.println(method.getParams());
         code.append(param_type).append(")");
 
         // RETURN TYPE --------------------------------------------------------------------------------
@@ -241,7 +238,6 @@ public class JasminGenerator {
 
         // store value in the stack in destination
         var lhs = assign.getDest();
-        var rhs = assign.getRhs();
 
         if (!(lhs instanceof Operand)) {
             throw new NotImplementedException(lhs.getClass());
@@ -265,7 +261,6 @@ public class JasminGenerator {
             }
             else code.append("astore_").append(reg).append(NL);
         }
-
 
         return code.toString();
     }
@@ -325,6 +320,19 @@ public class JasminGenerator {
         return code.toString();
     }
 
+    public static String getClassName(ClassUnit classUnit, String nameofClass) {
+        for (String importElement: classUnit.getImports()) {
+            String[] split = importElement.split("\\.");
+            String lastImport = (split.length == 0) ? importElement : split[split.length - 1];
+
+            if (lastImport.equals(nameofClass)) {
+                return importElement.replace('.', '/');
+            }
+        }
+        if(nameofClass.contains(".")) return classUnit.getClassName().replace(".", "/");
+        return classUnit.getClassName();
+    }
+
     private String generatePutField(PutFieldInstruction put_field_instr){
         var code = new StringBuilder();
         Element e1 = put_field_instr.getOperands().get(0);
@@ -332,42 +340,28 @@ public class JasminGenerator {
         Element e3 = put_field_instr.getOperands().get(2);
 
         String field_type = getParameterShortType(e2.getType().getTypeOfElement());
-        var temp = new StringBuilder();
-        if (e2.getType().getTypeOfElement() == ElementType.OBJECTREF) {
-            temp.append(((ClassType) e2.getType()).getName());
-        }
-
-
         String field_name = ((Operand) e2).getName();
-        String class_name = ((ClassType) e1.getType()).getName();
+        String class_name = getClassName(ollirResult.getOllirClass(), ((ClassType) e1.getType()).getName());
 
-        if(e1.getType().getTypeOfElement().name().equals("THIS")){ code.append("aload_0" + NL); }
+        code.append(getOperatorCases(e1));
         code.append(getOperatorCases(e3));
-        code.append("putfield " + class_name + "/" + field_name + " " + field_type+temp);
+        code.append("putfield " + class_name + "/" + field_name + " " + field_type);
 
         return code.toString();
     }
 
     private String generateGetField(GetFieldInstruction get_field_instr){
         var code = new StringBuilder();
-        var field_list = get_field_instr.getOperands();
+        Element e1 = get_field_instr.getOperands().get(0);
+        Element e2 = get_field_instr.getOperands().get(1);
 
-        var reg = currentMethod.getVarTable().get(((Operand) get_field_instr.getOperands().get(0)).getName()).getVirtualReg();
-        code.append("aload_").append(reg).append(NL);
+        String field_type = getParameterShortType(e2.getType().getTypeOfElement());
+        String field_name = ((Operand) e2).getName();
+        String class_name = getClassName(ollirResult.getOllirClass(), ((ClassType) e1.getType()).getName());
 
-        String class_name = "";
-        if(field_list.get(0).getType() instanceof ClassType bb){
-            class_name = bb.getName();
-        }
+        code.append(getOperatorCases(e1));
+        code.append("getfield " + class_name + "/" + field_name + " " + field_type).append(NL);
 
-        var field_type = field_list.get(1).getType().getTypeOfElement();
-        code.append("getfield ").append(class_name + "/").append(((Operand) field_list.get(1)).getName() + " ");
-        code.append(getParameterShortType(field_type));
-        if (field_type == ElementType.OBJECTREF) {
-            code.append(((ClassType) field_list.get(1).getType()).getName());
-        }
-
-        code.append(NL);
         return code.toString();
     }
 
@@ -375,28 +369,20 @@ public class JasminGenerator {
         var code = new StringBuilder();
 
         switch(call_instr.getInvocationType()) {
-
-
             case invokespecial:
-
                 for(var op : call_instr.getOperands()){
                     var s = getOperatorCases(op);
                     code.append(s);
                 }
-                code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "(" );
-
-                for(var arg : call_instr.getArguments()){
-                    code.append(getFieldType(arg.getType()));
-                }
-                code.append(")");
+                code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "()" );
 
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
-                code.append(NL);
 
                 break;
+
             case invokestatic:
                 for(var op : call_instr.getOperands()){
                 var s = getOperatorCases(op);
@@ -417,6 +403,7 @@ public class JasminGenerator {
                 }
                 code.append(NL);
                 break;
+
             case invokevirtual:
                 for(var op : call_instr.getOperands()){
                     var s = getOperatorCases(op);
@@ -437,16 +424,18 @@ public class JasminGenerator {
                 code.append(NL);
 
                 break;
+
             case NEW:
                 if(call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append("new ").append(((Operand) call_instr.getOperands().get(0)).getName()).append(NL);
                     code.append("dup" + NL);
-
                 }
                 break;
+
             case ldc:
                 code.append("ldc ").append(NL);
                 break;
+
             default:
                 code.append("");
         }
