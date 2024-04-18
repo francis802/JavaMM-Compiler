@@ -9,6 +9,7 @@ class Varargs {
 
     public int varargs(int... a) {
         int v;
+        v = 0;
         boolean b;
         b = true;
         return a[v];

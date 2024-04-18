@@ -22,8 +22,6 @@ public class ArrayAccess extends AnalysisVisitor {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.ARRAY_SUBS, this::visitArrayAccess);
         addVisit(Kind.DESCRIBED_ARRAY, this::visitArrayDescribed);
-        addVisit(Kind.TYPE, this::visitArrayIndex);
-        //addVisit(Kind.TYPE, this::visitArrayIndex);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
