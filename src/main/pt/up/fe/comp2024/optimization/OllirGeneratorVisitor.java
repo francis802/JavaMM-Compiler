@@ -127,23 +127,11 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         StringBuilder code = new StringBuilder();
         code.append(func.getComputation());
 
-        Type thisType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        Type thisType = TypeUtils.getExprType(node, table);
         String typeString = OptUtils.toOllirType(thisType);
 
         code.append(func.getCode());
-        boolean isStatic = false;
-        for (var import_ : table.getImports()) {
-            if (import_.contains(node.get("name"))) {
-                isStatic = true;
-                break;
-            }
-        }
-        if(isStatic) {
-            code.append(".V");
-        } else {
-            code.append(typeString);
-        }
-        String tyoe = TypeUtils.getExprType(node, table).getName();
+        code.append(typeString);
         code.append(END_STMT);
 
         return code.toString();
