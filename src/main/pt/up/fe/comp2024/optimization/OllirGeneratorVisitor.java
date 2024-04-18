@@ -297,6 +297,9 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
     private String visitProgram(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
+        for (var import_ : table.getImports()) {
+            code.append("import ").append(import_).append(";\n");
+        }
 
         node.getChildren().stream()
                 .map(this::visit)
