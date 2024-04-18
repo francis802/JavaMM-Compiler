@@ -199,11 +199,12 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             code.append("(");
 
             var params = node.getChildren(PARAM);
-            for (int i = 0; i < params.size(); i++) {
-                var param = params.get(i);
+            while (!params.isEmpty()){
+                var param = params.get(0);
                 var paramCode = visit(param);
                 code.append(paramCode);
-                if (i < (params.size() - 1)) {
+                params = param.getChildren(PARAM);
+                if (!params.isEmpty()){
                     code.append(", ");
                 }
             }
