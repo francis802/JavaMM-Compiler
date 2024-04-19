@@ -1,9 +1,9 @@
 import A.B.C;
-class Varargs {
+class Varargs{
 
     public int foo() {
         int a;
-        a = this.varargs(this.varargs(1));
+        a = this.varargs(this.zoo(1));
         return a;
     }
 

@@ -107,7 +107,8 @@ public class TypeUtils {
             return new Type("", false);
         }
         var importLst = table.getImports().stream().map(x -> x.split("\\.")[x.split("\\.").length - 1]).toList();
-        if ((callerType.getName().equals(table.getClassName()) && !importLst.contains(table.getSuper())) || OBJECT.check(functionCall.getJmmChild(0))){
+        if ((callerType.getName().equals(table.getClassName()) && !importLst.contains(table.getSuper())) || (OBJECT.check(functionCall.getJmmChild(0)) && table.getSuper().isEmpty())){
+            System.out.println("here");
             var methods = functionCall.getAncestor(Kind.CLASS_DECL).get().getChildren(Kind.METHOD_DECL);
             for (var method : methods){
                 if (method.get("name").equals(functionCall.get("name"))){
