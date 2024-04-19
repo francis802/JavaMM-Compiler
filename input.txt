@@ -8,7 +8,7 @@ class MethodsAndFields{
 	boolean field2;
 
 	public int getField1(){
-	    1 = 1;
+	    this = 1;
 	    return 1;
 	}
 

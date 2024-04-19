@@ -36,6 +36,17 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
+        if(left.get("value").equals("this")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignment),
+                    NodeUtils.getColumn(assignment),
+                    "Left Var is not a variable!",
+                    null)
+            );
+            return null;
+        }
+
         if(left.getKind().equals("IntegerLiteral")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
