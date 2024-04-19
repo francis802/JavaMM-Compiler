@@ -36,17 +36,6 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
-        /*if(!Kind.VAR_REF_EXPR.check(assignment.getJmmChild(0))) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(assignment),
-                    NodeUtils.getColumn(assignment),
-                    "Left Var is not defined!",
-                    null)
-            );
-            return null;
-        }*/
-
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
 
