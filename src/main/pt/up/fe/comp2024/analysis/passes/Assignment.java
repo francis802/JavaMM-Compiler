@@ -37,7 +37,7 @@ public class Assignment extends AnalysisVisitor {
         }
 
 
-        if(left.getKind().equals("IntegerLiteral")) {
+        if(!left.getKind().equals("VarRefExpr")) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignment),
