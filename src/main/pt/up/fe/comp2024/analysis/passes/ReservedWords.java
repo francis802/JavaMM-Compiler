@@ -25,7 +25,8 @@ public class ReservedWords extends AnalysisVisitor {
         addVisit(Kind.VAR_DECL, this::visitVarRefExpr);
     }
 
-    private Void visitMethodDecl(JmmNode method, SymbolTable table) {{
+    private Void visitMethodDecl(JmmNode method, SymbolTable table) {
+
         for (var desc : method.getDescendants()) {
             if (desc.getKind().equals("Param")) {
                 if (desc.get("name").equals("Length") || desc.get("name").equals("Main") || desc.get("name").equals("String") ||
