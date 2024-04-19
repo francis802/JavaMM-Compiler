@@ -1,12 +1,14 @@
 package pt.up.fe.comp2024.analysis.passes;
 
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
+import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.comp2024.analysis.AnalysisVisitor;
 import pt.up.fe.comp2024.ast.Kind;
 import pt.up.fe.comp2024.ast.NodeUtils;
+import pt.up.fe.comp2024.ast.TypeUtils;
 
 /**
  * Checks if the type of the expression in a return statement is compatible with the method return type.
@@ -20,7 +22,7 @@ public class LengthMethod extends AnalysisVisitor {
     @Override
     public void buildVisitor() {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
-        addVisit(Kind.LENGTH, this::visitVarRefExpr);
+        addVisit(Kind.LENGTH, this::visitLength);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -28,12 +30,19 @@ public class LengthMethod extends AnalysisVisitor {
         return null;
     }
 
-    private Void visitVarRefExpr(JmmNode length, SymbolTable table) {
+    private Void visitLength(JmmNode length, SymbolTable table) {
+        var left = length.getJmmChild(0);
+        Type leftType = TypeUtils.getExprType(left, table);
+        if (leftType.isArray()) {
+            return null;
+        }
+        /*
         for(var desc : length.getDescendants()) {
             if (desc.getKind().equals("ArrayDeclaration")) {
                 return null;
             }
         }
+         */
 
         var message = String.format("Calculating the length for a non-array variable", length);
         addReport(Report.newError(
