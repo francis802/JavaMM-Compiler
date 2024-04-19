@@ -24,7 +24,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                                       new ConditionExpression(),
                                       new ThisDeclaration(),
                                       new MethodCalls(),
-                                      new ImportChecks()
+                                      new ImportChecks(),
+                                      new DuplicatedInstances()
         );
 
     }
