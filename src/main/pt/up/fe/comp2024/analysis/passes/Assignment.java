@@ -36,7 +36,7 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
-        if (Kind.INTEGER_LITERAL.check(left) || Kind.TRUE_LITERAL.check(left) || Kind.FALSE_LITERAL.check(left) || Kind.BINARY_EXPR.check(left) || Kind.OBJECT.check(left) || Kind.DESCRIBED_ARRAY.check(left)) {
+        if (Kind.INTEGER_LITERAL.check(left) || Kind.TRUE_LITERAL.check(left) || Kind.FALSE_LITERAL.check(left) || Kind.BINARY_EXPR.check(left) || Kind.OBJECT.check(left) || Kind.DESCRIBED_ARRAY.check(left) || Kind.NEGATION.check(left) || Kind.LENGTH.check(left)) {
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(assignment),
