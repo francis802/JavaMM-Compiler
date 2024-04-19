@@ -76,7 +76,7 @@ public class JasminGenerator {
         else if(elements_type == ElementType.INT32) param_type.append("I");
         else if(elements_type == ElementType.BOOLEAN) param_type.append("Z");
         else if(elements_type == ElementType.VOID) param_type.append("V");
-        else if(elements_type == ElementType.OBJECTREF) param_type.append("V");
+        else if(elements_type == ElementType.OBJECTREF) param_type.append("L");
 
         return param_type.toString();
     }
@@ -87,11 +87,11 @@ public class JasminGenerator {
             case ARRAYREF -> param_type.append("[" + getParameterShortType(((ArrayType) type).getElementType().getTypeOfElement()) + ";");
             default -> param_type.append(getParameterShortType(type.getTypeOfElement()));
         }
-        /*
+
         if (type.getTypeOfElement() == ElementType.OBJECTREF) {
             param_type.append(((ClassType) type).getName());
         }
-        */
+
 
         return param_type.toString();
     }
@@ -142,6 +142,7 @@ public class JasminGenerator {
 
         if (classUnit.getSuperClass() != null){
             constructor.append( """
+                ;default constructor
                 .method public <init>()V
                     aload_0
                     invokespecial""").append(" " + getClassName(classUnit,classUnit.getSuperClass()));
@@ -149,6 +150,7 @@ public class JasminGenerator {
         }
         else{
             constructor.append("""
+                ;default constructor
                 .method public <init>()V
                     aload_0
                     invokespecial java/lang/Object/<init>()V
@@ -205,11 +207,11 @@ public class JasminGenerator {
         // RETURN TYPE --------------------------------------------------------------------------------
 
         code.append(getParameterShortType(method.getReturnType().getTypeOfElement()));
-        /*
+
         if (method.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
-            code.append(((ClassType) method.getReturnType()).getName());
+            code.append(((ClassType) method.getReturnType()).getName() + ";");
         }
-        */
+
 
         code.append(NL);
 
@@ -385,7 +387,7 @@ public class JasminGenerator {
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 /*
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
-                    code.append(((ClassType) call_instr.getReturnType()).getName());
+                    code.append(((ClassType) call_instr.getReturnType()).getName() + ";");
                 }
 
                  */
@@ -414,7 +416,7 @@ public class JasminGenerator {
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 /*
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
-                    code.append(((ClassType) call_instr.getReturnType()).getName());
+                    code.append(((ClassType) call_instr.getReturnType()).getName() + ";");
                 }
 
                  */
@@ -443,7 +445,7 @@ public class JasminGenerator {
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 /*
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
-                    code.append(((ClassType) call_instr.getReturnType()).getName());
+                    code.append(((ClassType) call_instr.getReturnType()).getName() + ";" );
                 }
 
                  */
