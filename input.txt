@@ -2,12 +2,12 @@ import M;
 import IO.stream.l.k;
 
 class MethodsAndFields{
-	int field1;
+	int[] field1;
 	int a;
 	boolean field2;
 
 	public int getField1(){
-		field1 = a.length;
+		field1 = (new int[3]).length;
 		return 1;
 	}
 
