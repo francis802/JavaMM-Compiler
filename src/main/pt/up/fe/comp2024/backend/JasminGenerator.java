@@ -142,7 +142,7 @@ public class JasminGenerator {
             constructor.append( """
                 .method public <init>()V
                     aload_0
-                    invokespecial""").append(" " + classUnit.getSuperClass());
+                    invokespecial""").append(" " + getClassName(classUnit,classUnit.getSuperClass()));
             constructor.append("/<init>()V\n" + TAB + " return\n.end method");
         }
         else{
