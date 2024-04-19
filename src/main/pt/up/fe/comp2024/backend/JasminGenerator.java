@@ -290,8 +290,8 @@ public class JasminGenerator {
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
-            case ANDB -> "iand";
-            case ORB -> "ior";
+            //case ANDB -> "iand";
+            //case ORB -> "ior";
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
