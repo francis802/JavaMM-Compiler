@@ -26,8 +26,8 @@ public class JmmAnalysisImpl implements JmmAnalysis {
                                       new MethodCalls(),
                                       new ImportChecks(),
                                       new DuplicatedInstances(),
-                                      new Varargs(),
-                                      new ReservedWords()
+                                      new Varargs()
+                                      //new ReservedWords()
         );
 
     }
