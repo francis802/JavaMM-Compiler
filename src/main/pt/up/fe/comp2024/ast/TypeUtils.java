@@ -41,9 +41,10 @@ public class TypeUtils {
             case ARRAY_DECLARATION -> new Type(expr.getJmmChild(0).get("name"), true);
             case ARRAY_SUBS -> new Type(getExprType(expr.getJmmChild(0),table).getName(), false);
             case DESCRIBED_ARRAY -> new Type(INT_TYPE_NAME, true);
-            case ASSIGN_STMT -> getExprType(expr.getJmmChild(0), table);
+            case ASSIGN_STMT, PARENTHESIS -> getExprType(expr.getJmmChild(0), table);
             case OBJECT -> new Type(table.getClassName(), false);
             case RETURN_STMT -> new Type(expr.getParent().getJmmChild(0).get("name"), expr.getParent().getJmmChild(0).get("isArray").equals("true"));
+            case NEGATION -> new Type(BOOLEAN_TYPE_NAME, false);
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
         };
 
@@ -57,7 +58,7 @@ public class TypeUtils {
 
         return switch (operator) {
             case "+", "*", "-", "/" -> new Type(INT_TYPE_NAME, false);
-            case "<", ">", "<=", ">=", "==", "!=", "&&", "||", "!" -> new Type(BOOLEAN_TYPE_NAME, false);
+            case "<", ">", "<=", ">=", "==", "!=", "&&", "||" -> new Type(BOOLEAN_TYPE_NAME, false);
             default ->
                     throw new RuntimeException("Unknown operator '" + operator + "' of expression '" + binaryExpr + "'");
         };
