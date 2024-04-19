@@ -219,7 +219,7 @@ public class JasminGenerator {
 
             code.append(instCode);
 
-            if(inst.getInstType().equals(InstructionType.CALL) && ((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) code.append("pop");
+            if(inst.getInstType().equals(InstructionType.CALL) && ((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) code.append("pop" + NL);
         }
 
         code.append(".end method\n");
@@ -374,13 +374,14 @@ public class JasminGenerator {
                     var s = getOperatorCases(op);
                     code.append(s);
                 }
+
                 code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "()" );
 
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
-                code.append(NL + "pop" + NL);
+                //code.append(NL + "pop" + NL);
                 break;
 
             case invokestatic:
