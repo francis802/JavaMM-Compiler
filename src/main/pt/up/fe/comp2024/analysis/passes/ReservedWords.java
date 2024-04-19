@@ -26,9 +26,13 @@ public class ReservedWords extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
+        if(method.get("name").equals("Length") || method.get("name").equals("Main") || method.get("name").equals("String") ||
+                method.get("name").equals("length") || method.get("name").equals("main") || method.get("name").equals("string"))
+
         for (var desc : method.getDescendants()) {
             if (desc.getKind().equals("Param")) {
-                if (desc.get("name").equals("Length") || desc.get("name").equals("Main") || desc.get("name").equals("String")) {
+                if (desc.get("name").equals("Length") || desc.get("name").equals("Main") || desc.get("name").equals("String") ||
+                    desc.get("name").equals("length") || desc.get("name").equals("main") || desc.get("name").equals("string")) {
                     var message = String.format("Reserved variable identifier", desc);
                     addReport(Report.newError(
                             Stage.SEMANTIC,

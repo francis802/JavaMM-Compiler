@@ -1,13 +1,11 @@
-class MethodsAndFields{
-	int field1;
+import A.B.C;
+class Varargs extends C{
 
-	public int getField1(){
-		return field1;
-	}
+    public C foo() {
+        return new C();
+    }
 
-
-
-	public static void main(String[] args){
-
-	}
+    public C varargs(int a, C b, Varargs c) {
+        return c.foo();
+    }
 }
