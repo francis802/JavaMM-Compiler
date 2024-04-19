@@ -33,7 +33,7 @@ public class LengthMethod extends AnalysisVisitor {
     private Void visitLength(JmmNode length, SymbolTable table) {
         var left = length.getJmmChild(0);
         Type leftType = TypeUtils.getExprType(left, table);
-        if (leftType.isArray()) {
+        if (leftType.isArray() && leftType.getName().equals("int")) {
             return null;
         }
 
