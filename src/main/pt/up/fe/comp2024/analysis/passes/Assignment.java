@@ -31,6 +31,12 @@ public class Assignment extends AnalysisVisitor {
     private Void visitVarAssign(JmmNode assignment, SymbolTable table) {
         JmmNode left = assignment.getJmmChild(0);
         JmmNode right = assignment.getJmmChild(1);
+        while (Kind.PARENTHESIS.check(left)) {
+            left = left.getJmmChild(0);
+        }
+        while (Kind.PARENTHESIS.check(right)) {
+            right = right.getJmmChild(0);
+        }
 
         if(right.toString().equals("Length")) {
             return null;
