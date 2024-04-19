@@ -28,7 +28,6 @@ PUBLIC : 'public' ;
 VOID : 'void' ;
 STATIC : 'static' ;
 RETURN : 'return' ;
-LENGTH : 'length' ;
 
 INTEGER : [0] | ([1-9][0-9]*) ;
 ID : [a-zA-Z_$]([a-zA-Z_$0-9])* ;
@@ -51,7 +50,7 @@ classDecl
     : CLASS classname=ID ('extends' superclass=ID)? LCURLY varDecl* methodDecl* RCURLY;
 
 varDecl
-    : type name=(ID|LENGTH) SEMI;
+    : type name=ID SEMI;
 
 type locals[boolean isArray=false, boolean isVarArgs=false]
     : name=INT ('[' ']' {$isArray=true;} | '...' {$isArray=true; $isVarArgs=true;})?
@@ -109,9 +108,9 @@ expr
     | value='false' #FalseLiteral //
     | value=THIS #Object //
     | THIS DOT name=ID #FieldCall //
-    | name=(ID|LENGTH) #VarRefExpr //
+    | name=ID #VarRefExpr //
     | value = '!' expr #Negation //
-    | expr DOT LENGTH #Length //
+    | expr DOT 'length' #Length //
     | '[' ( expr ( ',' expr )* )? ']' #DescribedArray
     ;
 
