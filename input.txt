@@ -1,11 +1,13 @@
-import A.B.C;
-class Varargs extends C{
+class MethodsAndFields{
+	int field1;
 
-    public C foo() {
-        return new C();
-    }
+	public int getField1(){
+		return field1;
+	}
 
-    public C varargs(int a, C b, Varargs c) {
-        return c.foo();
-    }
+
+
+	public static void main(String[] args){
+
+	}
 }
