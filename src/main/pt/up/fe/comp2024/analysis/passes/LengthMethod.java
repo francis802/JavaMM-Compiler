@@ -36,13 +36,13 @@ public class LengthMethod extends AnalysisVisitor {
         if (leftType.isArray()) {
             return null;
         }
-        /*
+
         for(var desc : length.getDescendants()) {
             if (desc.getKind().equals("ArrayDeclaration")) {
                 return null;
             }
         }
-         */
+
 
         var message = String.format("Calculating the length for a non-array variable", length);
         addReport(Report.newError(
