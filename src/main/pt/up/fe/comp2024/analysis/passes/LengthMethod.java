@@ -29,9 +29,33 @@ public class LengthMethod extends AnalysisVisitor {
     }
 
     private Void visitVarRefExpr(JmmNode length, SymbolTable table) {
-
         for(var desc : length.getDescendants()) {
-            if(!desc.getKind().equals("ArrayDeclaration")) {
+            if (desc.getKind().equals("ArrayDeclaration")) {
+                return null;
+            }
+        }
+
+        var message = String.format("Calculating the length for a non-array variable", length);
+        addReport(Report.newError(
+                Stage.SEMANTIC,
+                NodeUtils.getLine(length),
+                NodeUtils.getColumn(length),
+                message,
+                null)
+        );
+
+        /*for(var desc : length.getDescendants()) {
+            System.out.println(desc.getKind());
+            if(!(desc.getKind().equals("Parenthesis") && desc.getChild(0).getKind().equals("ArrayDeclaration"))) {
+                var message = String.format("Calculating the length for a non-array variable", length);
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(length),
+                        NodeUtils.getColumn(length),
+                        message,
+                        null)
+                );
+            } else if (!desc.getKind().equals("ArrayDeclaration")) {
                 var message = String.format("Calculating the length for a non-array variable", length);
                 addReport(Report.newError(
                         Stage.SEMANTIC,
@@ -41,7 +65,7 @@ public class LengthMethod extends AnalysisVisitor {
                         null)
                 );
             }
-        }
+        }*/
 
 
         return null;
