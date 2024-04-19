@@ -55,6 +55,8 @@ public class Varargs extends AnalysisVisitor {
                 return null;
             }
         }
+        if (method.get("isMain").equals("true"))
+            return null;
         var returnType = method.getJmmChild(0);
         if (returnType.get("isVarArgs").equals("true")) {
             addReport(Report.newError(
