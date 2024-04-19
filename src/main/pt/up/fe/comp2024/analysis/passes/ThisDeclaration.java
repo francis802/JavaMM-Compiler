@@ -19,6 +19,7 @@ public class ThisDeclaration extends AnalysisVisitor {
         addVisit(Kind.METHOD_DECL, this::visitMethodDecl);
         addVisit(Kind.OBJECT, this::visitObjectCall);
         addVisit(Kind.FIELD_CALL, this::visitFieldCall);
+        addVisit(Kind.VAR_REF_EXPR, this::visitVarRefExpr);
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
@@ -50,6 +51,32 @@ public class ThisDeclaration extends AnalysisVisitor {
                     null)
             );
             return null;
+        }
+        return null;
+    }
+
+    private Void visitVarRefExpr(JmmNode varRefExpr, SymbolTable table) {
+        for (var local : table.getLocalVariables(currentMethod.get("name"))) {
+            if (Objects.equals(local.getName(), varRefExpr.get("name"))) {
+                return null;
+            }
+        }
+        for (var param : table.getParameters(currentMethod.get("name"))) {
+            if (Objects.equals(param.getName(), varRefExpr.get("name"))) {
+                return null;
+            }
+        }
+        for (var field : table.getFields()) {
+            if (Objects.equals(field.getName(), varRefExpr.get("name")) && currentMethod.get("isMain").equals("true")) {
+                addReport(Report.newError(
+                        Stage.SEMANTIC,
+                        NodeUtils.getLine(varRefExpr),
+                        NodeUtils.getColumn(varRefExpr),
+                        "Cannot use field in main method!",
+                        null)
+                );
+                return null;
+            }
         }
         return null;
     }
