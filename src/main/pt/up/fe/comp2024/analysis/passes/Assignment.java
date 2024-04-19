@@ -36,18 +36,6 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
-
-        if(!left.getKind().equals("VarRefExpr")) {
-            addReport(Report.newError(
-                    Stage.SEMANTIC,
-                    NodeUtils.getLine(assignment),
-                    NodeUtils.getColumn(assignment),
-                    "Left Var is not a variable!",
-                    null)
-            );
-            return null;
-        }
-
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
 
