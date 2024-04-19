@@ -1,5 +1,6 @@
 class A {
    public boolean a(){
+      1 = 1;
       return !!(true);
    }
 
