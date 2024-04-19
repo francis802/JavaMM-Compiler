@@ -113,24 +113,23 @@ public class MethodCalls extends AnalysisVisitor {
             Type argType = TypeUtils.getExprType(funcCall.getJmmChild(i), table);
             JmmNode param;
             if (!varagsDetected) {
+                param = params.get(i - 1);
                 if(i > params.size()){
                     addReport(Report.newError(
                             Stage.SEMANTIC,
-                            NodeUtils.getLine(funcCall),
-                            NodeUtils.getColumn(funcCall),
+                            NodeUtils.getLine(param),
+                            NodeUtils.getColumn(param),
                             "Function call has too many arguments.",
                             null)
                     );
                     return null;
                 }
-
-                param = params.get(i - 1);
                 if (param.getJmmChild(0).get("isVarArgs").equals("true")) {
                     if (params.lastIndexOf(param) != params.size() - 1) {
                         addReport(Report.newError(
                                 Stage.SEMANTIC,
-                                NodeUtils.getLine(funcCall),
-                                NodeUtils.getColumn(funcCall),
+                                NodeUtils.getLine(param),
+                                NodeUtils.getColumn(param),
                                 "Varargs must be the last parameter in a function call",
                                 null)
                         );
@@ -147,8 +146,8 @@ public class MethodCalls extends AnalysisVisitor {
                 if (!argType.getName().equals(paramType.getName())) {
                     addReport(Report.newError(
                             Stage.SEMANTIC,
-                            NodeUtils.getLine(funcCall),
-                            NodeUtils.getColumn(funcCall),
+                            NodeUtils.getLine(param),
+                            NodeUtils.getColumn(param),
                             "Function call argument type does not match parameter type.",
                             null)
                     );
@@ -157,8 +156,8 @@ public class MethodCalls extends AnalysisVisitor {
                 else if (argType.isArray() && params.size() != (funcCall.getNumChildren()-1)) {
                     addReport(Report.newError(
                             Stage.SEMANTIC,
-                            NodeUtils.getLine(funcCall),
-                            NodeUtils.getColumn(funcCall),
+                            NodeUtils.getLine(param),
+                            NodeUtils.getColumn(param),
                             "Eitheir you send one array to varargs or you send multiple arguments of the same type of varargs. You can't do both.",
                             null)
                     );
@@ -169,8 +168,8 @@ public class MethodCalls extends AnalysisVisitor {
                 if(!argType.equals(paramType)){
                     addReport(Report.newError(
                             Stage.SEMANTIC,
-                            NodeUtils.getLine(funcCall),
-                            NodeUtils.getColumn(funcCall),
+                            NodeUtils.getLine(param),
+                            NodeUtils.getColumn(param),
                             "Function call argument type does not match parameter type.",
                             null)
                     );
