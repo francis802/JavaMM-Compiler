@@ -1,20 +1,6 @@
-import M;
-import IO.stream.write;
-import IO.stream.read;
+class A {
+   public boolean a(){
+      return !!(true);
+   }
 
-class MethodsAndFields{
-	int field1;
-	int a;
-	boolean field2;
-
-	public int getField1(){
-	    this = 1;
-	    return 1;
-	}
-
-
-
-
-	public static void main(String[] args){
-	}
 }
