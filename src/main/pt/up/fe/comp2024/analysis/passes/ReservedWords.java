@@ -51,7 +51,8 @@ public class ReservedWords extends AnalysisVisitor {
         // Check if exists a parameter or variable declaration with the same name as the variable reference
         var varRefName = varRefExpr.get("name");
 
-        if (varRefName.equals("length") || varRefName.equals("String") || varRefName.equals("main")) {
+        if (varRefName.equals("Length") || varRefName.equals("String") || varRefName.equals("Main") ||
+            varRefName.equals("length") || varRefName.equals("string") || varRefName.equals("main")) {
             var message = String.format("Reserved variable identifier", varRefName);
             addReport(Report.newError(
                     Stage.SEMANTIC,
