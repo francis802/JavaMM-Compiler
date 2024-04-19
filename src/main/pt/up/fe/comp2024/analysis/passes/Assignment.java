@@ -36,6 +36,17 @@ public class Assignment extends AnalysisVisitor {
             return null;
         }
 
+        if (Kind.INTEGER_LITERAL.check(left) || Kind.TRUE_LITERAL.check(left) || Kind.FALSE_LITERAL.check(left)) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(assignment),
+                    NodeUtils.getColumn(assignment),
+                    "Can't assign to a literal!",
+                    null)
+            );
+            return null;
+        }
+
         Type leftType = TypeUtils.getExprType(left, table);
         Type rightType = TypeUtils.getExprType(right, table);
 
