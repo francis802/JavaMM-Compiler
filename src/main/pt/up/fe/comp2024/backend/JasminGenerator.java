@@ -89,7 +89,7 @@ public class JasminGenerator {
         }
 
         if (type.getTypeOfElement() == ElementType.OBJECTREF) {
-            param_type.append(((ClassType) type).getName());
+            param_type.append(((ClassType) type).getName() + ";");
         }
 
 
@@ -132,7 +132,7 @@ public class JasminGenerator {
             code.append(getParameterShortType(field.getFieldType().getTypeOfElement()));
 
             if (field.getFieldType().getTypeOfElement() == ElementType.OBJECTREF) {
-                code.append(((ClassType) field.getFieldType()).getName());
+                code.append(((ClassType) field.getFieldType()).getName() + ";");
             }
             code.append(NL);
         }
@@ -201,7 +201,10 @@ public class JasminGenerator {
 
         for(var param: method.getParams()){
             param_type.append(getFieldType(param.getType()));
+
         }
+
+
         code.append(param_type).append(")");
 
         // RETURN TYPE --------------------------------------------------------------------------------
@@ -454,8 +457,8 @@ public class JasminGenerator {
 
             case NEW:
                 var ret_type = ((ClassType) call_instr.getReturnType()).getName();
-                code.append("new " + ret_type + NL + "dup" + NL);
-                //code.append("new " + ret_type + NL);
+                //code.append("new " + ret_type + NL + "dup" + NL);
+                code.append("new " + ret_type + NL);
                 break;
 
             case ldc:
