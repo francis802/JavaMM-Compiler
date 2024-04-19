@@ -104,7 +104,7 @@ public class JasminGenerator {
 
         // CLASS --------------------------------------------------------------------------------
         var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class public ").append(getClassName(classUnit,className)).append(NL).append(NL);
+        code.append(".class public ").append(className).append(NL).append(NL);
 
         // TODO: Hardcoded to Object, needs to be expanded
         if (classUnit.getSuperClass() != null){
@@ -383,9 +383,12 @@ public class JasminGenerator {
                 code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "()" );
 
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
+                /*
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
+
+                 */
                 //code.append(NL + "pop" + NL);
                 break;
 
@@ -409,9 +412,12 @@ public class JasminGenerator {
                 code.append(")");
 
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
+                /*
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
                     code.append(((ClassType) call_instr.getReturnType()).getName());
                 }
+
+                 */
                 code.append(NL);
                 break;
 
@@ -446,8 +452,8 @@ public class JasminGenerator {
 
             case NEW:
                 var ret_type = ((ClassType) call_instr.getReturnType()).getName();
-                //code.append("new " + ret_type + NL + "dup" + NL);
-                code.append("new " + ret_type + NL);
+                code.append("new " + ret_type + NL + "dup" + NL);
+                //code.append("new " + ret_type + NL);
                 break;
 
             case ldc:
