@@ -89,15 +89,33 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitVarRef(JmmNode node, Void unused) {
         StringBuilder computation = new StringBuilder();
         StringBuilder code = new StringBuilder();
-        for (var field: table.getFields()){
-            if (field.getName().equals(node.get("name"))){
-                var typeCode = OptUtils.toOllirType(field.getType());
-                var temp = OptUtils.getTemp();
-                computation.append(temp).append(typeCode).append(SPACE);
-                computation.append(ASSIGN).append(typeCode).append(SPACE);
-                computation.append("getfield(this, ").append(field.getName()).append(typeCode).append(")").append(typeCode).append(END_STMT);
-                code.append(temp).append(typeCode);
-                return new OllirExprResult(code.toString(), computation);
+        var method = node.getAncestor(METHOD_DECL).get();
+        var locals = table.getLocalVariables(method.get("name"));
+        var params = table.getParameters(method.get("name"));
+        boolean isLocalParam = false;
+        for (var local : locals){
+            if (local.getName().equals(node.get("name"))){
+                isLocalParam = true;
+                break;
+            }
+        }
+        for (var param : params){
+            if (param.getName().equals(node.get("name"))){
+                isLocalParam = true;
+                break;
+            }
+        }
+        if (!isLocalParam) {
+            for (var field : table.getFields()) {
+                if (field.getName().equals(node.get("name"))) {
+                    var typeCode = OptUtils.toOllirType(field.getType());
+                    var temp = OptUtils.getTemp();
+                    computation.append(temp).append(typeCode).append(SPACE);
+                    computation.append(ASSIGN).append(typeCode).append(SPACE);
+                    computation.append("getfield(this, ").append(field.getName()).append(typeCode).append(")").append(typeCode).append(END_STMT);
+                    code.append(temp).append(typeCode);
+                    return new OllirExprResult(code.toString(), computation);
+                }
             }
         }
         var id = node.get("name");
@@ -180,7 +198,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
-        if(BINARY_EXPR.check(node.getJmmParent()) || FUNCTION_CALL.check(node.getJmmParent()) || RETURN_STMT.check(node.getJmmParent())){
+        if(BINARY_EXPR.check(node.getJmmParent()) || FUNCTION_CALL.check(node.getJmmParent()) || RETURN_STMT.check(node.getJmmParent()) || ASSIGN_STMT.check(node.getJmmParent())){
             Type parentType = TypeUtils.getExprType(node.getJmmParent(), table);
             String parentOllirType = OptUtils.toOllirType(parentType);
             var temp = OptUtils.getTemp();

@@ -41,6 +41,7 @@ public class TypeUtils {
             case ARRAY_DECLARATION -> new Type(expr.getJmmChild(0).get("name"), true);
             case ARRAY_SUBS -> new Type(getExprType(expr.getJmmChild(0),table).getName(), false);
             case DESCRIBED_ARRAY -> new Type(INT_TYPE_NAME, true);
+            case ASSIGN_STMT -> getExprType(expr.getJmmChild(0), table);
             case OBJECT -> new Type(table.getClassName(), false);
             case RETURN_STMT -> new Type(expr.getParent().getJmmChild(0).get("name"), expr.getParent().getJmmChild(0).get("isArray").equals("true"));
             default -> throw new UnsupportedOperationException("Can't compute type for expression kind '" + kind + "'");
