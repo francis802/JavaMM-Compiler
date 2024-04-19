@@ -23,6 +23,52 @@ public class MethodCalls extends AnalysisVisitor {
     }
 
     private Void visitMethodDecl(JmmNode method, SymbolTable table) {
+        var returns = method.getChildren(Kind.RETURN_STMT);
+        if (returns.isEmpty() && !method.get("isMain").equals("true")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "Method does not return a value.",
+                    null)
+            );
+            return null;
+        }
+        if (returns.size() > 1) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "Method has more than one return statement.",
+                    null)
+            );
+            return null;
+        }
+        if (returns.size() == 1 && method.get("isMain").equals("true")) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "Main method should not have a return statement.",
+                    null)
+            );
+            return null;
+        }
+        if(method.get("isMain").equals("true")){
+            return null;
+        }
+        var stmts = method.getChildren();
+        System.out.println(stmts);
+        if (!Kind.RETURN_STMT.check(stmts.get(stmts.size() - 1))) {
+            addReport(Report.newError(
+                    Stage.SEMANTIC,
+                    NodeUtils.getLine(method),
+                    NodeUtils.getColumn(method),
+                    "Return statement should be the last statement in a method.",
+                    null)
+            );
+            return null;
+        }
         return null;
     }
 
