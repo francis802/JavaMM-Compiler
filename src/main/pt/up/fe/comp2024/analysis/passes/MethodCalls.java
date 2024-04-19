@@ -58,7 +58,6 @@ public class MethodCalls extends AnalysisVisitor {
             return null;
         }
         var stmts = method.getChildren();
-        System.out.println(stmts);
         if (!Kind.RETURN_STMT.check(stmts.get(stmts.size() - 1))) {
             addReport(Report.newError(
                     Stage.SEMANTIC,

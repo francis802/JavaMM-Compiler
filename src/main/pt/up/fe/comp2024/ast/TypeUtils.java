@@ -125,6 +125,34 @@ public class TypeUtils {
                 var parMethod = functionCall.getAncestor(METHOD_DECL).get();
                 return table.getReturnType(parMethod.get("name"));
             }
+            if (FUNCTION_CALL.check(functionCall.getParent())){
+                int paramNum = -1;
+                for (int i = 1; i < functionCall.getParent().getNumChildren(); i++){
+                    if (functionCall.getParent().getJmmChild(i).equals(functionCall)){
+                        paramNum = i;
+                        break;
+                    }
+                }
+                var methods = functionCall.getAncestor(CLASS_DECL).get().getChildren(METHOD_DECL);
+                for (var method : methods){
+                    if (method.get("name").equals(functionCall.getParent().get("name"))){
+                        var params = method.getChildren(PARAM);
+
+                        while (!params.isEmpty()){
+                            paramNum--;
+                            var param = params.get(0);
+                            if (paramNum == 0){
+                                var typeNode = param.getJmmChild(0);
+                                return new Type(typeNode.get("name"), typeNode.get("isArray").equals("true"));
+                            }
+                            paramNum--;
+                            params = param.getChildren(PARAM);
+                        }
+                        return new Type("", false);
+                    }
+                }
+                return getExprType(functionCall.getParent(), table);
+            }
             return new Type("void", false);
         }
     }

@@ -1,9 +1,9 @@
 import A.B.C;
-class Varargs extends C {
+class Varargs {
 
     public int foo() {
         int a;
-        a = this.varargs(10);
+        a = this.varargs(this.varargs(1));
         return a;
     }
 
