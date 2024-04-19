@@ -1,13 +1,23 @@
-import A.B.C;
-class Varargs extends C{
+import M;
+import IO.stream.l.k;
 
-    public C foo() {
-    int length;
-    length = 0;
-        return new C();
-    }
+class MethodsAndFields{
+	int field1;
+	int a;
+	boolean field2;
 
-    public C varargs(int a, C b, Varargs c) {
-        return c.foo();
-    }
+	public int getField1(){
+		field1 = a.length;
+		return 1;
+	}
+
+	public boolean getField2(){
+		return field2;
+	}
+
+
+
+	public static void main(String[] args){
+
+	}
 }

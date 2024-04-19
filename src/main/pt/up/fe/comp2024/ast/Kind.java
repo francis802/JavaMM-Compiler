@@ -25,6 +25,7 @@ public enum Kind {
     VAR_REF_EXPR,
     OBJECT_DECLARATION,
     FUNCTION_CALL,
+    LENGTH,
     FIELD_CALL,
     ARRAY_DECLARATION,
     ARRAY_SUBS,
