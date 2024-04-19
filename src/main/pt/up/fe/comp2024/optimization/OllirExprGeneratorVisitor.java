@@ -180,7 +180,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
-        if(BINARY_EXPR.check(node.getJmmParent()) || FUNCTION_CALL.check(node.getJmmParent())){
+        if(BINARY_EXPR.check(node.getJmmParent()) || FUNCTION_CALL.check(node.getJmmParent()) || RETURN_STMT.check(node.getJmmParent())){
             Type parentType = TypeUtils.getExprType(node.getJmmParent(), table);
             String parentOllirType = OptUtils.toOllirType(parentType);
             var temp = OptUtils.getTemp();

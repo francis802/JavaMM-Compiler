@@ -1,13 +1,11 @@
 import A.B.C;
-class Varargs{
+class Varargs extends C{
 
-    public int foo() {
-        int a;
-        a = this.varargs(this.zoo(1));
-        return a;
+    public C foo() {
+        return new C();
     }
 
-    public int varargs(int a) {
-        return 0;
+    public C varargs(int a, C b, Varargs c) {
+        return c.foo();
     }
 }
