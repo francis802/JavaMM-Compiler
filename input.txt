@@ -2,6 +2,8 @@ import A.B.C;
 class Varargs extends C{
 
     public C foo() {
+    int length;
+    length = 0;
         return new C();
     }
 
