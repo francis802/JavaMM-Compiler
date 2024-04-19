@@ -125,16 +125,6 @@ public class MethodCalls extends AnalysisVisitor {
                     return null;
                 }
                 if (param.getJmmChild(0).get("isVarArgs").equals("true")) {
-                    if (params.lastIndexOf(param) != params.size() - 1) {
-                        addReport(Report.newError(
-                                Stage.SEMANTIC,
-                                NodeUtils.getLine(param),
-                                NodeUtils.getColumn(param),
-                                "Varargs must be the last parameter in a function call",
-                                null)
-                        );
-                        return null;
-                    }
                     varagsDetected = true;
                 }
             }

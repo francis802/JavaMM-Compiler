@@ -8,8 +8,6 @@ class Varargs extends C {
     }
 
     public int varargs(int a) {
-        C c;
-        c = this;
         return 0;
     }
 }
