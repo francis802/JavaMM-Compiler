@@ -104,7 +104,7 @@ public class JasminGenerator {
 
         // CLASS --------------------------------------------------------------------------------
         var className = ollirResult.getOllirClass().getClassName();
-        code.append(".class public ").append(className).append(NL).append(NL);
+        code.append(".class public ").append(className).append(NL);
 
         // TODO: Hardcoded to Object, needs to be expanded
         if (classUnit.getSuperClass() != null){
@@ -385,7 +385,7 @@ public class JasminGenerator {
                     code.append(s);
                 }
 
-                code.append("invokespecial " + ((ClassType) call_instr.getOperands().get(0).getType()).getName() + "/" + "<init>" + "()" );
+                code.append("invokespecial " + getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName()) + "/" + "<init>" + "()" );
 
                 code.append(getParameterShortType(call_instr.getReturnType().getTypeOfElement()));
                 /*
