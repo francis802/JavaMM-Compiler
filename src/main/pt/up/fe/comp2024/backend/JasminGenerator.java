@@ -194,7 +194,7 @@ public class JasminGenerator {
         var is_static = method.isStaticMethod() ? "static " : "";
         // TODO: Hardcoded param types and return type, needs to be expanded
 
-        code.append("\n.method ").append(is_static).append(modifier).append(methodName).append("(");
+        code.append("\n.method ").append(modifier).append(is_static).append(methodName).append("(");
 
         // PARAMETERS TYPE --------------------------------------------------------------------------------
         var param_type = new StringBuilder();
