@@ -394,7 +394,6 @@ public class JasminGenerator {
                 }
 
                  */
-                //code.append(NL + "pop" + NL);
                 break;
 
             case invokestatic:
@@ -456,7 +455,7 @@ public class JasminGenerator {
                 break;
 
             case NEW:
-                var ret_type = ((ClassType) call_instr.getReturnType()).getName();
+                var ret_type = getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName());
                 //code.append("new " + ret_type + NL + "dup" + NL);
                 code.append("new " + ret_type + NL);
                 break;
