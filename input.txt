@@ -1,12 +1,18 @@
-import io.get.pimbo;
-class Complex{
-    public static void main(String[] args){
+import A.B.C;
 
+class Simple {
+
+    public static void main(String[] args) {
+        int n;
+        n = (new Simple()).foo((new Simple()).bar(), C.foo(1,2));
     }
-    public Complex yabadabado(Complex c){
-        Complex s;
-        int a;
-        s = new Complex();
-        return s;
-        }
+
+    public int foo(int n, int m) {
+        return n;
+    }
+
+    public int bar() {
+        return 1;
+    }
+
 }

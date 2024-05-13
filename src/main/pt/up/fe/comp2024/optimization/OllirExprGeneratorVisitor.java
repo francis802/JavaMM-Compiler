@@ -49,6 +49,13 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return visit(node.getJmmChild(0));
     }
 
+    private JmmNode getOffParenthesis(JmmNode node){
+        while (PARENTHESIS.check(node)){
+            node = node.getJmmChild(0);
+        }
+        return node;
+    }
+
     private OllirExprResult visitNegation(JmmNode node, Void unused) {
         StringBuilder code = new StringBuilder();
         StringBuilder computation = new StringBuilder();
@@ -182,7 +189,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
         StringBuilder invoker = new StringBuilder();
-        var varRef = node.getJmmChild(0);
+        var varRef = getOffParenthesis(node.getJmmChild(0));
         String varRefName;
         if (OBJECT.check(varRef)){
             varRefName = "this";

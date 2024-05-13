@@ -15,22 +15,22 @@ public class JasminTest {
 
     @Test
     public void ollirToJasminBasic() {
-        testOllirToJasmin("jasmin/OllirToJasminBasic.ollir");
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminBasic.ollir");
     }
 
     @Test
     public void ollirToJasminArithmetics() {
-        testOllirToJasmin("jasmin/OllirToJasminArithmetics.ollir");
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminArithmetics.ollir");
     }
 
     @Test
     public void ollirToJasminInvoke() {
-        testOllirToJasmin("jasmin/OllirToJasminInvoke.ollir");
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminInvoke.ollir");
     }
 
     @Test
     public void ollirToJasminFields() {
-        testOllirToJasmin("jasmin/OllirToJasminFields.ollir");
+        testOllirToJasmin("pt/up/fe/comp/cp2/jasmin/OllirToJasminFields.ollir");
     }
 
     public static void testOllirToJasmin(String resource, String expectedOutput) {

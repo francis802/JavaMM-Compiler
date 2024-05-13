@@ -74,6 +74,15 @@ public class MethodCalls extends AnalysisVisitor {
     private Void visitFunctionCall(JmmNode funcCall, SymbolTable table) {
         Type funcType = TypeUtils.getExprType(funcCall, table);
         if (funcType.getName().isEmpty()) {
+            JmmNode referer = funcCall.getChildren(Kind.VAR_REF_EXPR).get(0);
+            Type refererType = TypeUtils.getExprType(referer, table);
+            for (var import_ : table.getImports()) {
+                var lst = import_.split("\\.");
+                String importName = lst[lst.length - 1];
+                if (importName.equals(refererType.getName())) {
+                    return null;
+                }
+            }
             addReport(Report.newError(
                     Stage.SEMANTIC,
                     NodeUtils.getLine(funcCall),
@@ -154,7 +163,7 @@ public class MethodCalls extends AnalysisVisitor {
                 }
             }
             else {
-                if(!argType.equals(paramType)){
+                if(!argType.equals(paramType) && !argType.getName().isEmpty()){
                     addReport(Report.newError(
                             Stage.SEMANTIC,
                             NodeUtils.getLine(param),
