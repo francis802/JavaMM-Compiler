@@ -81,6 +81,17 @@ public class JasminGenerator {
         return param_type.toString();
     }
 
+    private String getArrayElementsType(ElementType elements_type){
+        var param_type = new StringBuilder();
+        if(elements_type == ElementType.STRING) param_type.append("String");
+        else if(elements_type == ElementType.INT32) param_type.append("int");
+        else if(elements_type == ElementType.BOOLEAN) param_type.append("boolean");
+        else if(elements_type == ElementType.OBJECTREF) param_type.append("idk");
+        else param_type.append("sem type");
+
+        return param_type.toString();
+    }
+
     private String getFieldType(Type type){
         var param_type = new StringBuilder();
         switch (type.getTypeOfElement()){
@@ -105,6 +116,7 @@ public class JasminGenerator {
         // CLASS --------------------------------------------------------------------------------
         var className = ollirResult.getOllirClass().getClassName();
         code.append(".class public ").append(className).append(NL);
+
 
         // TODO: Hardcoded to Object, needs to be expanded
         if (classUnit.getSuperClass() != null){
@@ -209,7 +221,10 @@ public class JasminGenerator {
 
         // RETURN TYPE --------------------------------------------------------------------------------
 
-        code.append(getParameterShortType(method.getReturnType().getTypeOfElement()));
+        //code.append(getParameterShortType(method.getReturnType().getTypeOfElement()));
+       // var temp = method.getReturnType().getTypeOfElement();
+        //var tmp2 = getFieldType(method.getReturnType());
+        code.append(getFieldType(method.getReturnType()));
 
         if (method.getReturnType().getTypeOfElement() == ElementType.OBJECTREF) {
             code.append(((ClassType) method.getReturnType()).getName() + ";");
@@ -220,18 +235,21 @@ public class JasminGenerator {
 
         // INSIDE --------------------------------------------------------------------------------
         // Add limits
+
         code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals 99").append(NL);
+        code.append(TAB).append(".limit locals " + method.getVarTable().size()).append(NL);
+
+        var methods_code = new StringBuilder();
 
         for (var inst : method.getInstructions()) {
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
-            code.append(instCode);
+            methods_code.append(instCode);
 
             if(inst.getInstType().equals(InstructionType.CALL) && ((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) code.append("pop" + NL);
         }
-
+        code.append(methods_code);
         code.append(".end method\n");
 
         // unset method
@@ -455,9 +473,15 @@ public class JasminGenerator {
                 break;
 
             case NEW:
-                var ret_type = getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName());
-                //code.append("new " + ret_type + NL + "dup" + NL);
-                code.append("new " + ret_type + NL);
+                if (call_instr.getReturnType().getTypeOfElement() == ElementType.ARRAYREF){
+                    code.append("newarray ");
+                    var type_elements = ((ArrayType) call_instr.getReturnType()).getElementType();
+                    code.append(getArrayElementsType(type_elements.getTypeOfElement()) + NL);
+                }
+                else{
+                    code.append("new " + getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName()) + NL);
+                }
+
                 break;
 
             case ldc:
