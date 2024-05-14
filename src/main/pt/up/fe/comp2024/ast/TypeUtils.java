@@ -148,7 +148,6 @@ public class TypeUtils {
                                 var typeNode = param.getJmmChild(0);
                                 return new Type(typeNode.get("name"), typeNode.get("isArray").equals("true"));
                             }
-                            paramNum--;
                             params = param.getChildren(PARAM);
                         }
                         return new Type("", false);
