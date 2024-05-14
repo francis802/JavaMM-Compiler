@@ -226,10 +226,17 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
-        if(BINARY_EXPR.check(node.getJmmParent()) || FUNCTION_CALL.check(node.getJmmParent()) || RETURN_STMT.check(node.getJmmParent()) || ASSIGN_STMT.check(node.getJmmParent())){
-            Type parentType = TypeUtils.getExprType(node.getJmmParent(), table);
+        if(BINARY_EXPR.check(node.getParent()) || FUNCTION_CALL.check(node.getParent()) || RETURN_STMT.check(node.getParent()) || ASSIGN_STMT.check(node.getParent())){
+            JmmNode parent = node.getParent();
+            Type parentType = TypeUtils.getExprType(parent, table);
+            while (parentType.getName().isEmpty()){
+                parent = parent.getParent();
+                parentType = TypeUtils.getExprType(parent, table);
+            }
             String parentOllirType = OptUtils.toOllirType(parentType);
             var temp = OptUtils.getTemp();
+            System.out.println("Parent type: " + node.getParent() + " - " + node);
+            System.out.println(temp + ": " + parentOllirType);
             computation.append(temp).append(parentOllirType).append(SPACE);
             computation.append(ASSIGN).append(parentOllirType).append(SPACE);
             computation.append(invoker).append(parentOllirType).append(END_STMT);

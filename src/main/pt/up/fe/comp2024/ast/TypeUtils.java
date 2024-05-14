@@ -156,6 +156,9 @@ public class TypeUtils {
                 }
                 return getExprType(functionCall.getParent(), table);
             }
+            if (BINARY_EXPR.check(functionCall.getParent())){
+                return getExprType(functionCall.getParent(), table);
+            }
             return new Type("void", false);
         }
     }
