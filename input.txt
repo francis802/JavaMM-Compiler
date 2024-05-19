@@ -1,20 +1,22 @@
-import A.B.C;
+import B.C;
 
-class Simple {
-    int x;
+class A {
 
     public static void main(String[] args) {
-        int n;
-        n = (new Simple()).foo((new Simple()).bar(), C.foo(1,2, (new Simple()).foo((new C()).zoo(), (new Simple()).bar())));
+        A a;
+        a.func(a.foo(), a.bar());
     }
 
-    public int foo(int n, int m) {
-        x = n + m;
-        return this.bar() + (new C()).wow(x);
+    int foo() {
+        return 0;
     }
 
-    public int bar() {
-        return 1;
+    boolean bar() {
+        return true;
+    }
+
+    int func(int a, boolean b) {
+        return 0;
     }
 
 }
