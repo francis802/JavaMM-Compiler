@@ -54,7 +54,13 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutField);
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
+        generators.put(GotoInstruction.class, this::generateGoto);
+        generators.put(OpCondInstruction.class, this::generateOpCond);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOp);
     }
+
+
 
     public List<Report> getReports() {
         return reports;
@@ -237,7 +243,8 @@ public class JasminGenerator {
         // Add limits
 
         code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals " + method.getVarTable().size()).append(NL);
+        if( methodName.equals("main")) code.append(TAB).append(".limit locals " + (method.getVarTable().size()-1)).append(NL);
+        else code.append(TAB).append(".limit locals " + (method.getVarTable().size())).append(NL);
 
         var methods_code = new StringBuilder();
 
@@ -318,8 +325,11 @@ public class JasminGenerator {
             case MUL -> "imul";
             case SUB -> "isub";
             case DIV -> "idiv";
+            case LTH -> "isub";
+            case NOTB -> "ixor";
             //case ANDB -> "iand";
             //case ORB -> "ior";
+            //
             default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
         };
 
@@ -541,6 +551,57 @@ public class JasminGenerator {
         }
 
         return "";
+    }
+
+    private String generateSingleOpCond(SingleOpCondInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        var info = "";
+        info += "A";
+
+        return "SingleOpCondition";
+    }
+
+    private String generateGoto(GotoInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        var temp = ((Instruction) instruction);
+        code.append("goto cmp_lt_" + instruction.getLabel());
+        return code.toString();
+    }
+
+    private String generateOpCond(OpCondInstruction instruction){
+        StringBuilder code = new StringBuilder();
+
+        var first_part = generateBinaryOp(((BinaryOpInstruction) instruction.getCondition()));
+        code.append(first_part);
+
+        switch (((BinaryOpInstruction) instruction.getCondition()).getOperation().getOpType()){
+            case LTH:
+                code.append("iflt cmp_lt_" + instruction.getLabel());
+                break;
+            default:
+                code.append("YET");
+        }
+
+        return code.toString();
+    }
+
+    private String generateUnaryOp(UnaryOpInstruction instruction){
+        var code = new StringBuilder();
+
+        var operand = getOperatorCases(instruction.getOperand());
+        code.append(operand);
+
+
+        var op_type = instruction.getOperation().getOpType();
+        switch (op_type){
+            case NOTB:
+                code.append("ixor");
+                break;
+            default:
+                code.append("Yet");
+        }
+
+        return code.toString() +NL;
     }
 
 }
