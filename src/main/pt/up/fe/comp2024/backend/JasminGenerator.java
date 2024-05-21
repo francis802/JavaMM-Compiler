@@ -248,6 +248,8 @@ public class JasminGenerator {
 
 
         var methods_code = new StringBuilder();
+        var limit_locals = method.getVarTable().size() == 0 ? 1 : method.getVarTable().size();
+
         maxStackSize = 0;
         currentStackSize = 0;
         for (var inst : method.getInstructions()) {
@@ -262,8 +264,7 @@ public class JasminGenerator {
         }
 
         code.append(TAB).append(".limit stack " + maxStackSize).append(NL);
-        if( methodName.equals("main")) code.append(TAB).append(".limit locals " + (method.getVarTable().size()-1)).append(NL);
-        else code.append(TAB).append(".limit locals " + (method.getVarTable().size())).append(NL);
+        code.append(TAB).append(".limit locals " + limit_locals).append(NL);
 
 
         code.append(methods_code);
