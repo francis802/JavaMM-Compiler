@@ -2,21 +2,14 @@ import B.C;
 
 class A {
 
-    public static void main(String[] args) {
-        A a;
-        a.func(a.foo(), a.bar());
+    int func(int[] a, boolean b) {
+        int[] c;
+        c = [1,2,3,4,5];
+        return c[1];
     }
 
-    int foo() {
-        return 0;
-    }
-
-    boolean bar() {
-        return true;
-    }
-
-    int func(int a, boolean b) {
-        return 0;
+    A createA() {
+        return new A();
     }
 
 }

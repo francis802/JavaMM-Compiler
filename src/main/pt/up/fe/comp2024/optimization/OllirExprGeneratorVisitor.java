@@ -40,8 +40,81 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         addVisit(FIELD_CALL, this::visitFieldCall);
         addVisit(NEGATION, this::visitNegation);
         addVisit(PARENTHESIS, this::visitParenthesis);
+        addVisit(ARRAY_DECLARATION, this::visitArrayDecl);
+        addVisit(ARRAY_SUBS, this::visitArraySubs);
+        addVisit(DESCRIBED_ARRAY, this::visitDescribedArray);
+        addVisit(LENGTH, this::visitArrayLength);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private boolean beingAssigned(JmmNode node){
+        if (ASSIGN_STMT.check(node.getParent())){
+            return node.getParent().getJmmChild(0).equals(node);
+        }
+        return false;
+    }
+
+    private OllirExprResult visitArrayLength(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        var expr = visit(node.getJmmChild(0));
+        var childType = TypeUtils.getExprType(node.getJmmChild(0), table);
+        computation.append(expr.getComputation());
+        var temp = OptUtils.getTemp();
+        var type = ".i32";
+        computation.append(temp).append(type).append(SPACE);
+        computation.append(ASSIGN).append(type).append(SPACE);
+        computation.append("arraylength(").append(expr.getCode()).append(")").append(type).append(END_STMT);
+        code.append(temp).append(type);
+        return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitArrayDecl(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        Type type = new Type(node.getJmmChild(0).get("name"), true);
+        var ollirType = OptUtils.toOllirType(type);
+        var item = visit(node.getJmmChild(1));
+        computation.append(item.getComputation());
+        var temp = OptUtils.getTemp();
+        computation.append(temp).append(ollirType).append(SPACE);
+        computation.append(ASSIGN).append(ollirType).append(SPACE);
+        computation.append("new(array, ").append(item.getCode()).append(")").append(ollirType).append(END_STMT);
+        code.append(temp).append(ollirType);
+        return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitArraySubs(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+        var array = visit(node.getJmmChild(0));
+        var index = visit(node.getJmmChild(1));
+        computation.append(array.getComputation());
+        computation.append(index.getComputation());
+
+        String arrayName = array.getCode();
+        String refName = arrayName.split("\\.")[0];
+        Type type = TypeUtils.getExprType(node.getJmmChild(0), table);
+        String ollirType = OptUtils.toOllirType(new Type(type.getName(), false));
+        String indexName = index.getCode();
+        if (beingAssigned(node)){
+            code.append(refName).append("[").append(indexName).append("]").append(ollirType);
+            return new OllirExprResult(code.toString(), computation);
+        }
+        var temp = OptUtils.getTemp();
+        computation.append(temp).append(ollirType).append(SPACE);
+        computation.append(ASSIGN).append(ollirType).append(SPACE);
+        computation.append(refName).append("[").append(indexName).append("]").append(ollirType).append(END_STMT);
+        code.append(temp).append(ollirType);
+        return new OllirExprResult(code.toString(), computation);
+    }
+
+    private OllirExprResult visitDescribedArray(JmmNode node, Void unused) {
+        StringBuilder computation = new StringBuilder();
+        StringBuilder code = new StringBuilder();
+
+        return new OllirExprResult(code.toString(), computation);
     }
 
 
@@ -226,7 +299,7 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
-        if(BINARY_EXPR.check(node.getParent()) || FUNCTION_CALL.check(node.getParent()) || RETURN_STMT.check(node.getParent()) || ASSIGN_STMT.check(node.getParent())){
+        if(BINARY_EXPR.check(node.getParent()) || FUNCTION_CALL.check(node.getParent()) || RETURN_STMT.check(node.getParent()) || ASSIGN_STMT.check(node.getParent()) || ARRAY_SUBS.check(node.getParent()) || FIELD_CALL.check(node.getParent()) || LENGTH.check(node.getParent()) || NEGATION.check(node.getParent()) || PARENTHESIS.check(node.getParent()) || ARRAY_DECLARATION.check(node.getParent()) || OBJECT_DECLARATION.check(node.getParent())) {
             JmmNode parent = node.getParent();
             Type type = TypeUtils.getExprType(node, table);
             if (type.getName().isEmpty())

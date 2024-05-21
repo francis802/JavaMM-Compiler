@@ -43,10 +43,14 @@ public class JmmParserImpl implements JmmParser {
             var tokens = new CommonTokenStream(lex);
             // Transforms tokens into a parse tree
             var parser = new pt.up.fe.comp2024.JavammParser(tokens);
-
-
             // Convert ANTLR CST to JmmNode AST
-            return AntlrParser.parse(lex, parser, startingRule, config);
+            var ast = AntlrParser.parse(lex, parser, startingRule, config);
+
+            if(ast.getRootNode() != null) {
+                System.out.println("Root node: " + ast.getRootNode().toTree());
+            }
+            // Convert ANTLR CST to JmmNode AST
+            return ast;
 
         } catch (Exception e) {
             // There was an uncaught exception during parsing, create an error JmmParserResult without root node

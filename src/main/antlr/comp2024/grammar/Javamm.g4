@@ -78,9 +78,9 @@ stmt
     : expr SEMI #ExprStmt //
     | LCURLY (stmt)* RCURLY #CurlyStmt //
     | RETURN expr SEMI #ReturnStmt //
-    | ifExpr elseExpr #ConditionalStmt //
-    | 'for' LPAREN stmt expr ';' expr RPAREN stmt #ForStmt //
-    | 'while' LPAREN expr RPAREN stmt #WhileStmt //
+    | ifExpr elseExpr #ConditionalStmt //TODO
+    | 'for' LPAREN stmt expr ';' expr RPAREN stmt #ForStmt //DON'T DO!
+    | 'while' LPAREN expr RPAREN stmt #WhileStmt //TODO
     | expr EQUALS expr SEMI #AssignStmt //
     ;
 
@@ -94,8 +94,8 @@ elseExpr
 
 expr
     : LPAREN expr RPAREN #Parenthesis //
-    | expr '[' expr ']' #ArraySubs //
-    | 'new' type '[' expr ']' #ArrayDeclaration //
+    | expr '[' expr ']' #ArraySubs //TODO
+    | 'new' type '[' expr ']' #ArrayDeclaration //TODO
     | 'new' name=ID LPAREN (expr (',' expr)*)? RPAREN #ObjectDeclaration //
     | expr DOT name=ID LPAREN (expr (',' expr)*)? RPAREN #FunctionCall //
     | expr op= (MUL | DIV) expr #BinaryExpr //
@@ -111,8 +111,8 @@ expr
     | THIS DOT name=ID #FieldCall //
     | name=(ID|LENGTH) #VarRefExpr //
     | value = '!' expr #Negation //
-    | expr DOT 'length' #Length //
-    | '[' ( expr ( ',' expr )* )? ']' #DescribedArray
+    | expr DOT 'length' #Length //TODO
+    | '[' ( expr ( ',' expr )* )? ']' #DescribedArray //TODO
     ;
 
 

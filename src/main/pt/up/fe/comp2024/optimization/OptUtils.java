@@ -35,21 +35,25 @@ public class OptUtils {
         TYPE.checkOrThrow(typeNode);
 
         String typeName = typeNode.get("name");
+        boolean isArray = typeNode.get("isArray").equals("true");
 
-        return toOllirType(typeName);
+        return toOllirType(typeName, isArray);
     }
 
     public static String toOllirType(Type type) {
-        return toOllirType(type.getName());
+        return toOllirType(type.getName(), type.isArray());
     }
 
-    private static String toOllirType(String typeName) {
+    private static String toOllirType(String typeName, boolean isArray) {
         String type = "." + switch (typeName) {
             case "int" -> "i32";
             case "boolean" -> "bool";
             case "void" -> "V";
             default -> typeName;
         };
+        if (isArray) {
+            type = ".array" + type;
+        }
 
         return type;
     }
