@@ -546,7 +546,10 @@ public class JasminGenerator {
                 var first_op = call_instr.getOperands().get(0);
                 code.append(getOperatorCases(first_op)).append(NL);
                 break;
-
+            case arraylength:
+                var tt = call_instr.getOperands().get(0);
+                code.append(getOperatorCases(tt) + "arraylength").append(NL);
+                break;
             default:
                 code.append("");
         }
