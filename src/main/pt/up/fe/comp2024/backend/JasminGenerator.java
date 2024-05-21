@@ -33,6 +33,9 @@ public class JasminGenerator {
 
     Method currentMethod;
 
+    int maxStackSize;
+    int currentStackSize;
+
     private final FunctionClassMap<TreeNode, String> generators;
 
     public JasminGenerator(OllirResult ollirResult) {
@@ -54,7 +57,13 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutField);
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(CallInstruction.class, this::generateCall);
+        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
+        generators.put(GotoInstruction.class, this::generateGoto);
+        generators.put(OpCondInstruction.class, this::generateOpCond);
+        generators.put(UnaryOpInstruction.class, this::generateUnaryOp);
     }
+
+
 
     public List<Report> getReports() {
         return reports;
@@ -236,19 +245,28 @@ public class JasminGenerator {
         // INSIDE --------------------------------------------------------------------------------
         // Add limits
 
-        code.append(TAB).append(".limit stack 99").append(NL);
-        code.append(TAB).append(".limit locals " + method.getVarTable().size()).append(NL);
+
 
         var methods_code = new StringBuilder();
+        var limit_locals = method.getVarTable().size() == 0 ? 1 : method.getVarTable().size();
 
+        maxStackSize = 0;
+        currentStackSize = 0;
         for (var inst : method.getInstructions()) {
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
+
+            if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
 
             methods_code.append(instCode);
 
             if(inst.getInstType().equals(InstructionType.CALL) && ((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) code.append("pop" + NL);
         }
+
+        code.append(TAB).append(".limit stack " + maxStackSize).append(NL);
+        code.append(TAB).append(".limit locals " + limit_locals).append(NL);
+
+
         code.append(methods_code);
         code.append(".end method\n");
 
@@ -281,14 +299,22 @@ public class JasminGenerator {
             if(reg > 3){
                 code.append("istore ").append(reg).append(NL);
             }
-            else code.append("istore_").append(reg).append(NL);
+            else{
+                code.append("istore_").append(reg).append(NL);
+            }
+            currentStackSize++;
         }
         else if(lhs.getType().getTypeOfElement() == ElementType.ARRAYREF || lhs.getType().getTypeOfElement() == ElementType.STRING || lhs.getType().getTypeOfElement() == ElementType.THIS || lhs.getType().getTypeOfElement() == ElementType.OBJECTREF){
             if(reg > 3){
                 code.append("astore ").append(reg).append(NL);
             }
-            else code.append("astore_").append(reg).append(NL);
+            else {
+                code.append("astore_").append(reg).append(NL);
+
+            }
+            currentStackSize++;
         }
+        if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
 
         return code.toString();
     }
@@ -311,18 +337,47 @@ public class JasminGenerator {
         // load values on the left and on the right
         code.append(generators.apply(binaryOp.getLeftOperand()));
         code.append(generators.apply(binaryOp.getRightOperand()));
-
+        var op = new StringBuilder();
         // apply operation
-        var op = switch (binaryOp.getOperation().getOpType()) {
-            case ADD -> "iadd";
-            case MUL -> "imul";
-            case SUB -> "isub";
-            case DIV -> "idiv";
-            //case ANDB -> "iand";
-            //case ORB -> "ior";
-            default -> throw new NotImplementedException(binaryOp.getOperation().getOpType());
-        };
+        switch (binaryOp.getOperation().getOpType()) {
+            case ADD:
+                op.append("iadd");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            case MUL:
+                op.append("imul");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            case SUB:
+                op.append("isub");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            case DIV:
+                op.append("idiv");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            case LTH:
+                op.append("isub");
+                currentStackSize--;
+                break;
+            case NOTB:
+                op.append("ixor");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            // Caso queira adicionar operações lógicas AND e OR
+            case ANDB:
+                op.append("iand");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            case ORB:
+                op.append("ior");
+                currentStackSize--; // Consome 2 operandos, empilha 1 resultado
+                break;
+            default:
+                throw new NotImplementedException(binaryOp.getOperation().getOpType());
+        }
 
+        if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
         code.append(op).append(NL);
 
         return code.toString();
@@ -344,7 +399,7 @@ public class JasminGenerator {
         else{
             code.append("return").append(NL);
         }
-
+        currentStackSize--;
         return code.toString();
     }
 
@@ -474,6 +529,9 @@ public class JasminGenerator {
 
             case NEW:
                 if (call_instr.getReturnType().getTypeOfElement() == ElementType.ARRAYREF){
+                    for(var arg : call_instr.getArguments()){
+                        code.append(getOperatorCases(arg));
+                    }
                     code.append("newarray ");
                     var type_elements = ((ArrayType) call_instr.getReturnType()).getElementType();
                     code.append(getArrayElementsType(type_elements.getTypeOfElement()) + NL);
@@ -488,7 +546,10 @@ public class JasminGenerator {
                 var first_op = call_instr.getOperands().get(0);
                 code.append(getOperatorCases(first_op)).append(NL);
                 break;
-
+            case arraylength:
+                var tt = call_instr.getOperands().get(0);
+                code.append(getOperatorCases(tt) + "arraylength").append(NL);
+                break;
             default:
                 code.append("");
         }
@@ -505,20 +566,27 @@ public class JasminGenerator {
 
             }
             else {
-                int int_literal = parseInt(((LiteralElement) element).getLiteral());
+                int int_literal = Integer.parseInt(((LiteralElement) element).getLiteral());
                 if (int_literal == -1) {
-                    code.append("iconst m1");
+                    code.append("iconst_m1");
+                    currentStackSize++;
                 } else if (int_literal >= 0 && int_literal <= 5) {
                     code.append("iconst_").append(int_literal);
+                    currentStackSize++;
                 } else if (int_literal >= -128 && int_literal <= 127) {
                     code.append("bipush ").append(int_literal);
+                    currentStackSize++;
                 } else if (int_literal >= -32768 && int_literal <= 32767) {
                     code.append("sipush ").append(int_literal);
+                    currentStackSize++;
                 } else {
                     code.append("ldc ").append(int_literal);
+                    currentStackSize++;
                 }
                 code.append(NL);
+
             }
+            if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
             return code.toString();
         }
         else if(element.getType().getTypeOfElement() == ElementType.INT32 || element.getType().getTypeOfElement() == ElementType.BOOLEAN){
@@ -527,7 +595,8 @@ public class JasminGenerator {
                 code.append("iload " + reg + NL);
             }
             else code.append("iload_" + reg + NL);
-
+            currentStackSize--;
+            if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
             return code.toString();
         }
         else if(element.getType().getTypeOfElement() == ElementType.OBJECTREF || element.getType().getTypeOfElement() == ElementType.STRING || element.getType().getTypeOfElement() == ElementType.ARRAYREF || element.getType().getTypeOfElement() == ElementType.THIS){
@@ -536,11 +605,63 @@ public class JasminGenerator {
                 code.append("aload " + reg + NL);
             }
             else code.append("aload_" + reg + NL);
-
+            currentStackSize--;
+            if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
             return code.toString();
         }
 
         return "";
+    }
+
+    private String generateSingleOpCond(SingleOpCondInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        var info = "";
+        info += "A";
+
+        return "SingleOpCondition";
+    }
+
+    private String generateGoto(GotoInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        var temp = ((Instruction) instruction);
+        code.append("goto cmp_lt_" + instruction.getLabel());
+        return code.toString();
+    }
+
+    private String generateOpCond(OpCondInstruction instruction){
+        StringBuilder code = new StringBuilder();
+
+        var first_part = generateBinaryOp(((BinaryOpInstruction) instruction.getCondition()));
+        code.append(first_part);
+
+        switch (((BinaryOpInstruction) instruction.getCondition()).getOperation().getOpType()){
+            case LTH:
+                code.append("iflt cmp_lt_" + instruction.getLabel());
+                break;
+            default:
+                code.append("YET");
+        }
+
+        return code.toString();
+    }
+
+    private String generateUnaryOp(UnaryOpInstruction instruction){
+        var code = new StringBuilder();
+
+        var operand = getOperatorCases(instruction.getOperand());
+        code.append(operand);
+
+
+        var op_type = instruction.getOperation().getOpType();
+        switch (op_type){
+            case NOTB:
+                code.append("ixor");
+                break;
+            default:
+                code.append("Yet");
+        }
+
+        return code.toString() +NL;
     }
 
 }
