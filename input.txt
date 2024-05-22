@@ -8,6 +8,12 @@ class SimpleWhileStat {
         i = 0;
 
         while (i < a) {
+            if (i < 5) {
+                c = 1;
+            } else {
+                c = 0;
+            }
+
             i = i + 1;
         }
 

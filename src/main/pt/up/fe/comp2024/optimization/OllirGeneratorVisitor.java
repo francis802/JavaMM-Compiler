@@ -102,6 +102,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append("if (").append(condition.getCode()).append(") goto ENDLOOP_").append(loopNumber).append(END_STMT);
         code.append(stmt);
         code.append("goto LOOP_").append(loopNumber).append(END_STMT);
+        code.append("ENDLOOP_").append(loopNumber).append(": \n");
         return code.toString();
     }
 
