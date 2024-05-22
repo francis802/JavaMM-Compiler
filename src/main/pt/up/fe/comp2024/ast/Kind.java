@@ -32,7 +32,8 @@ public enum Kind {
     DESCRIBED_ARRAY,
     OBJECT,
     PARENTHESIS,
-    NEGATION;
+    NEGATION,
+    CURLY_STMT;
 
 
     private static final Set<Kind> STATEMENTS = Set.of(ASSIGN_STMT, RETURN_STMT);

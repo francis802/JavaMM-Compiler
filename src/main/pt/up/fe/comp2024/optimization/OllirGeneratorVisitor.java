@@ -25,6 +25,8 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
 
 
     private final SymbolTable table;
+    private static int numberLoops = 0;
+    private static int numberIfs = 0;
 
     private final OllirExprGeneratorVisitor exprVisitor;
 
@@ -45,9 +47,20 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
+        //addVisit(CONDITIONAL_STMT, this::visitConditionStmt);
+        addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(PARENTHESIS, this::visitExprStatement);
+        addVisit(CURLY_STMT, this::visitExprStatement);
 
         setDefaultVisit(this::defaultVisit);
+    }
+
+    private static int getLoopNumber() {
+        return numberLoops++;
+    }
+
+    private static int getIfNumber() {
+        return numberIfs++;
     }
 
     private boolean isFieldCall(JmmNode node) {
@@ -77,6 +90,19 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             }
         }
         return false;
+    }
+
+    private String visitWhileStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+        var condition = exprVisitor.visit(node.getJmmChild(0));
+        var stmt = visit(node.getJmmChild(1));
+        int loopNumber = getLoopNumber();
+        code.append("LOOP_").append(loopNumber).append(": \n");
+        code.append(condition.getComputation());
+        code.append("if (").append(condition.getCode()).append(") goto ENDLOOP_").append(loopNumber).append(END_STMT);
+        code.append(stmt);
+        code.append("goto LOOP_").append(loopNumber).append(END_STMT);
+        return code.toString();
     }
 
 
