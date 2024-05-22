@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNode;
@@ -113,9 +114,6 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitDescribedArray(JmmNode node, Void unused) {
         StringBuilder computation = new StringBuilder();
         StringBuilder code = new StringBuilder();
-        if(!ASSIGN_STMT.check(node.getParent())) {
-            throw new UnsupportedOperationException("Described array can only be used in assignment statements");
-        }
         var numbers = node.getChildren();
         String temp = OptUtils.getTemp();
         var type = TypeUtils.getExprType(node, table);
@@ -279,8 +277,36 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         return new OllirExprResult(code, computation);
     }
 
+    private boolean hasVarargs(JmmNode methodCall){
+        String methodName = methodCall.get("name");
+        if(methodCall.getAncestor(CLASS_DECL).isPresent()) {
+            List<JmmNode> methods = methodCall.getAncestor(CLASS_DECL).get().getChildren(METHOD_DECL);
+            for (var method : methods) {
+                if (method.getChildren(PARAM).isEmpty())
+                    continue;
+                if (method.get("name").equals(methodName)) {
+                    var param = method.getChildren(PARAM).get(0);
+                    while (param.getNumChildren() > 0){
+                        var type = param.getJmmChild(0);
+                        if (type.get("isVarArgs").equals("true")){
+                            System.out.println(type);
+                            return true;
+                        }
+                        if (param.getNumChildren() < 2)
+                            break;
+                        param = param.getJmmChild(1);
+                    }
+                    break;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private OllirExprResult visitFunctionCall(JmmNode node, Void unused) {
         StringBuilder invoker = new StringBuilder();
+        boolean hasVarargs = false;
         var varRef = getOffParenthesis(node.getJmmChild(0));
         String varRefName;
         if (OBJECT.check(varRef)){
@@ -309,12 +335,32 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
             var varRefType = TypeUtils.getExprType(varRef, table);
             String varRefOllirType = OptUtils.toOllirType(varRefType);
             invoker.append(varRefName).append(varRefOllirType).append(", ");
+            hasVarargs = hasVarargs(node);
         }
         invoker.append(methodName);
+        String tempVarArgs = "";
+        if (hasVarargs) {
+            System.out.println(node);
+            tempVarArgs = OptUtils.getTemp();
+            computation.append(tempVarArgs).append(".array.i32").append(SPACE);
+            computation.append(ASSIGN).append(".array.i32").append(SPACE);
+            computation.append("new(array, ").append(node.getNumChildren()-table.getParameters(node.get("name")).size()).append(".i32").append(")").append(".array.i32").append(END_STMT);
+        }
         for (int i = 1; i < node.getNumChildren(); i++) {
             var child = visit(node.getJmmChild(i));
-            invoker.append(", ").append(child.getCode());
-            computation.append(child.getComputation());
+            if (hasVarargs && i > table.getParameters(node.get("name")).size() - 1){
+                computation.append(child.getComputation());
+                computation.append(tempVarArgs).append("[").append(i-table.getParameters(node.get("name")).size()).append(".i32").append("]").append(".i32").append(SPACE);
+                computation.append(ASSIGN).append(".i32").append(SPACE);
+                computation.append(child.getCode()).append(END_STMT);
+            }
+            else {
+                invoker.append(", ").append(child.getCode());
+                computation.append(child.getComputation());
+            }
+        }
+        if (hasVarargs){
+            invoker.append(", ").append(tempVarArgs).append(".array.i32");
         }
         invoker.append(")");
         StringBuilder code = new StringBuilder();
