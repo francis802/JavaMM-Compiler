@@ -113,6 +113,25 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
     private OllirExprResult visitDescribedArray(JmmNode node, Void unused) {
         StringBuilder computation = new StringBuilder();
         StringBuilder code = new StringBuilder();
+        if(!ASSIGN_STMT.check(node.getParent())) {
+            throw new UnsupportedOperationException("Described array can only be used in assignment statements");
+        }
+        var numbers = node.getChildren();
+        String temp = OptUtils.getTemp();
+        var type = TypeUtils.getExprType(node, table);
+        String ollirType = OptUtils.toOllirType(type);
+        computation.append(temp).append(ollirType).append(SPACE);
+        computation.append(ASSIGN).append(ollirType).append(SPACE);
+        computation.append("new(array, ").append(numbers.size()).append(".i32").append(")").append(ollirType).append(END_STMT);
+        var typeElem = OptUtils.toOllirType(new Type(type.getName(), false));
+        for (int i = 0; i < numbers.size(); i++) {
+            var number = visit(numbers.get(i));
+            computation.append(number.getComputation());
+            computation.append(temp).append("[").append(i).append(typeElem).append("]").append(typeElem).append(SPACE);
+            computation.append(ASSIGN).append(typeElem).append(SPACE);
+            computation.append(number.getCode()).append(END_STMT);
+        }
+        code.append(temp).append(ollirType);
 
         return new OllirExprResult(code.toString(), computation);
     }
