@@ -10,6 +10,8 @@ import pt.up.fe.specs.util.utilities.StringLines;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static java.lang.Integer.parseInt;
@@ -90,7 +92,7 @@ public class JasminGenerator {
 
     private String getParameterShortType(ElementType elements_type){
         var param_type = new StringBuilder();
-        if(elements_type == ElementType.STRING) param_type.append("Ljava/lang/String");
+        if(elements_type == ElementType.STRING) param_type.append("Ljava/lang/String;");
         else if(elements_type == ElementType.INT32) param_type.append("I");
         else if(elements_type == ElementType.BOOLEAN) param_type.append("Z");
         else if(elements_type == ElementType.VOID) param_type.append("V");
@@ -113,7 +115,8 @@ public class JasminGenerator {
     private String getFieldType(Type type){
         var param_type = new StringBuilder();
         switch (type.getTypeOfElement()){
-            case ARRAYREF -> param_type.append("[" + getParameterShortType(((ArrayType) type).getElementType().getTypeOfElement()) + ";");
+            case ARRAYREF -> param_type.append("[" + getParameterShortType(((ArrayType) type).getElementType().getTypeOfElement()));
+            case OBJECTREF -> param_type.append("L" + getClassName(ollirResult.getOllirClass(), ((ClassType) type).getName()) + ";");
             default -> param_type.append(getParameterShortType(type.getTypeOfElement()));
         }
 
@@ -257,7 +260,8 @@ public class JasminGenerator {
 
 
         var methods_code = new StringBuilder();
-        var limit_locals = method.getVarTable().size() == 0 ? 1 : method.getVarTable().size();
+        var limit_locals = calculateLimitLocals(method);
+
 
         maxStackSize = 0;
         currentStackSize = 0;
@@ -282,6 +286,18 @@ public class JasminGenerator {
 
         return code.toString();
     }
+
+    private int calculateLimitLocals(Method method) {
+        Set<Integer> virtualRegs = new TreeSet<>();
+        virtualRegs.add(0); // init, base case
+
+        // Verify all variables
+        for (Descriptor variable : method.getVarTable().values()) {
+            virtualRegs.add(variable.getVirtualReg()); // Variable index
+        }
+        return virtualRegs.size();
+    }
+
 
     private String generateAssign(AssignInstruction assign) {
         var code = new StringBuilder();
@@ -312,7 +328,7 @@ public class JasminGenerator {
             else{
                 code.append("istore_").append(reg).append(NL);
             }
-            addtoStackValue();
+            subtoStackValue();
         }
         else if(lhs.getType().getTypeOfElement() == ElementType.ARRAYREF || lhs.getType().getTypeOfElement() == ElementType.STRING || lhs.getType().getTypeOfElement() == ElementType.THIS || lhs.getType().getTypeOfElement() == ElementType.OBJECTREF){
             if(reg > 3){
@@ -322,7 +338,7 @@ public class JasminGenerator {
                 code.append("astore_").append(reg).append(NL);
 
             }
-            addtoStackValue();
+            subtoStackValue();
         }
 
         return code.toString();
@@ -335,6 +351,7 @@ public class JasminGenerator {
         var reg = currentMethod.getVarTable().get(((Operand) op).getName()).getVirtualReg();
 
         code.append("aload_"+ reg + NL);
+        addtoStackValue();
 
         code.append(getOperatorCases(((ArrayOperand) o).getIndexOperands().get(0)));
 
@@ -350,17 +367,17 @@ public class JasminGenerator {
         switch (operand.getType().getTypeOfElement()){
             case ARRAYREF, STRING, THIS, OBJECTREF:
                 code.append("astore " + currentMethod.getVarTable().get(((Operand) operand).getName()).getVirtualReg() + NL);
-                addtoStackValue();
+                subtoStackValue();
                 return code.toString();
             case BOOLEAN, INT32:
                 if(currentMethod.getVarTable().get(((Operand) operand).getName()).getVarType().getTypeOfElement() == ElementType.ARRAYREF){
                     code.append("iastore" + NL);
-                    addtoStackValue();
+                    subtoStackValue();
                     return code.toString();
                 }
                 else{
                     code.append("istore " + currentMethod.getVarTable().get(((Operand) operand).getName()).getVirtualReg() + NL);
-                    addtoStackValue();
+                    subtoStackValue();
                     return code.toString();
                 }
             default:
@@ -585,7 +602,7 @@ public class JasminGenerator {
                     code.append(getArrayElementsType(type_elements.getTypeOfElement()) + NL);
                 }
                 else{
-                    code.append("new " + getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName()) + NL);
+                    code.append("new " + getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName()) +  NL + "dup" + NL);
                 }
 
                 break;
@@ -647,7 +664,7 @@ public class JasminGenerator {
                 code.append("iload " + reg + NL);
             }
             else code.append("iload_" + reg + NL);
-            subtoStackValue();
+            addtoStackValue();
             return code.toString();
         }
         else if(element.getType().getTypeOfElement() == ElementType.OBJECTREF || element.getType().getTypeOfElement() == ElementType.STRING || element.getType().getTypeOfElement() == ElementType.ARRAYREF || element.getType().getTypeOfElement() == ElementType.THIS){
@@ -656,7 +673,7 @@ public class JasminGenerator {
                 code.append("aload " + reg + NL);
             }
             else code.append("aload_" + reg + NL);
-            subtoStackValue();
+            addtoStackValue();
             return code.toString();
         }
 
@@ -667,6 +684,7 @@ public class JasminGenerator {
         var code = new StringBuilder();
         var reg = currentMethod.getVarTable().get(array_op.getName()).getVirtualReg();
         code.append("aload_" + reg + NL);
+        addtoStackValue();
         code.append(getOperatorCases((array_op.getIndexOperands().get(0))));
         code.append("iaload" + NL);
         addtoStackValue();
