@@ -83,13 +83,13 @@ public class JasminGenerator {
     }
 
     private void addtoStackValue(int addiction){
-        currentStackSize += addiction;
-        if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
+        this.currentStackSize += addiction;
+        if(this.currentStackSize > this.maxStackSize) this.maxStackSize = this.currentStackSize;
     }
 
     private void subtoStackValue(int subtraction){
-        currentStackSize -= subtraction;
-        if(currentStackSize > maxStackSize) maxStackSize = currentStackSize;
+        this.currentStackSize -= subtraction;
+        if(this.currentStackSize > this.maxStackSize) this.maxStackSize = this.currentStackSize;
     }
 
     private String getParameterShortType(ElementType elements_type){
@@ -347,7 +347,8 @@ public class JasminGenerator {
                 code.append("astore_").append(reg).append(NL);
 
             }
-            subtoStackValue(1);
+            addtoStackValue(1);
+
         }
 
         return code.toString();
@@ -360,7 +361,13 @@ public class JasminGenerator {
         addtoStackValue(1);
         var reg = currentMethod.getVarTable().get(((Operand) op).getName()).getVirtualReg();
 
-        code.append("aload_"+ reg + NL);
+        if(reg > 3){
+            code.append("aload "+ reg + NL);
+        }
+        else{
+            code.append("aload_"+ reg + NL);
+        }
+
 
         code.append(getOperatorCases(((ArrayOperand) o).getIndexOperands().get(0)));
 
@@ -523,8 +530,8 @@ public class JasminGenerator {
 
             case invokestatic:
                 callArgs = 0;
+                callArgs += call_instr.getOperands().size();
                 for(var op : call_instr.getOperands()){
-                    callArgs += 1;
                     var s = getOperatorCases(op);
                     code.append(s);
                 }
@@ -551,9 +558,9 @@ public class JasminGenerator {
 
             case invokevirtual:
                 callArgs = 1;
+                callArgs += call_instr.getArguments().size();
                 for(var op : call_instr.getOperands()){
                     var s = getOperatorCases(op);
-                    callArgs += 1;
                     code.append(s);
                 }
 
@@ -588,10 +595,7 @@ public class JasminGenerator {
                 }
                 else{
                     callArgs = -1;
-                    for(var arg : call_instr.getArguments()){
-                        code.append(getOperatorCases(arg));
-                        callArgs += 1;
-                    }
+                    callArgs += call_instr.getOperands().size();
                     code.append("new " + getClassName(ollirResult.getOllirClass(), ((Operand) call_instr.getOperands().get(0)).getName()) +  NL + "dup" + NL);
                 }
 
@@ -638,25 +642,22 @@ public class JasminGenerator {
             addtoStackValue(1);
             return code.toString();
         }
-        else if(element.getType().getTypeOfElement() == ElementType.INT32 || element.getType().getTypeOfElement() == ElementType.BOOLEAN){
+        if(element instanceof Operand) {
             addtoStackValue(1);
-            var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
-            if(reg > 3){
-                code.append("iload " + reg + NL);
+            if (element.getType().getTypeOfElement() == ElementType.INT32 || element.getType().getTypeOfElement() == ElementType.BOOLEAN) {
+                var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
+                if (reg > 3) {
+                    code.append("iload " + reg + NL);
+                } else code.append("iload_" + reg + NL);
+                return code.toString();
+            } else if (element.getType().getTypeOfElement() == ElementType.OBJECTREF || element.getType().getTypeOfElement() == ElementType.STRING || element.getType().getTypeOfElement() == ElementType.ARRAYREF || element.getType().getTypeOfElement() == ElementType.THIS) {
+                var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
+                if (reg > 3) {
+                    code.append("aload " + reg + NL);
+                } else code.append("aload_" + reg + NL);
+                return code.toString();
             }
-            else code.append("iload_" + reg + NL);
-            return code.toString();
         }
-        else if(element.getType().getTypeOfElement() == ElementType.OBJECTREF || element.getType().getTypeOfElement() == ElementType.STRING || element.getType().getTypeOfElement() == ElementType.ARRAYREF || element.getType().getTypeOfElement() == ElementType.THIS){
-            addtoStackValue(1);
-            var reg = currentMethod.getVarTable().get(((Operand) element).getName()).getVirtualReg();
-            if(reg > 3){
-                code.append("aload " + reg + NL);
-            }
-            else code.append("aload_" + reg + NL);
-            return code.toString();
-        }
-
         return "";
     }
 
@@ -714,6 +715,7 @@ public class JasminGenerator {
         var op_type = instruction.getOperation().getOpType();
         switch (op_type){
             case NOTB:
+
                 code.append("ixor");
                 break;
             default:
