@@ -278,7 +278,7 @@ public class JasminGenerator {
             methods_code.append(instCode);
 
             if(inst.getInstType().equals(InstructionType.CALL) && ((CallInstruction) inst).getReturnType().getTypeOfElement() != ElementType.VOID) {
-                code.append("pop" + NL);
+                methods_code.append(TAB + "pop" + NL);
                 subtoStackValue(1);
             }
         }
