@@ -620,6 +620,7 @@ public class JasminGenerator {
                 code.append("");
         }
 
+
         return code.toString();
     }
 
@@ -639,23 +640,19 @@ public class JasminGenerator {
                 int int_literal = Integer.parseInt(((LiteralElement) element).getLiteral());
                 if (int_literal == -1) {
                     code.append("iconst_m1");
-                    addtoStackValue();
                 } else if (int_literal >= 0 && int_literal <= 5) {
                     code.append("iconst_").append(int_literal);
-                    addtoStackValue();
                 } else if (int_literal >= -128 && int_literal <= 127) {
                     code.append("bipush ").append(int_literal);
-                    addtoStackValue();
                 } else if (int_literal >= -32768 && int_literal <= 32767) {
                     code.append("sipush ").append(int_literal);
-                    addtoStackValue();
                 } else {
                     code.append("ldc ").append(int_literal);
-                    addtoStackValue();
                 }
                 code.append(NL);
 
             }
+            addtoStackValue();
             return code.toString();
         }
         else if(element.getType().getTypeOfElement() == ElementType.INT32 || element.getType().getTypeOfElement() == ElementType.BOOLEAN){
