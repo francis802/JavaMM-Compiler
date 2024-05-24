@@ -68,7 +68,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
             return true;
         }
         if (ARRAY_SUBS.check(node)) {
-            return isFieldCall(node.getJmmChild(0));
+            return false;
         }
         JmmNode method;
         if(node.getAncestor(METHOD_DECL).isPresent()) {

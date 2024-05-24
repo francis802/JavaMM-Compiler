@@ -1,13 +1,10 @@
-class ComplexArrayAccess {
-    public int foo(int... a){
-      int[] m;
-      m = [[1],[2],[3],[4]];
-	  return m[a[0]][0];
-	}
+class HelloWorld {
+    int[] a;
+    public int foo() {
+        a[0] = 1;
+        return a[0];
+    }
 
-	public static void main(String[] args) {
-	    ComplexArrayAccess caa;
-	    caa = new ComplexArrayAccess();
-	    caa.foo(2);
-	}
+    public static void main(String[] args) {
+    }
 }
