@@ -286,6 +286,8 @@ public class JasminGenerator {
         code.append(methods_code);
         code.append(".end method\n");
 
+
+
         // unset method
         currentMethod = null;
 
@@ -300,6 +302,7 @@ public class JasminGenerator {
         for (Descriptor variable : method.getVarTable().values()) {
             uniqueRegisters.add(variable.getVirtualReg()); // Variable index
         }
+
         return uniqueRegisters.size();
     }
 
@@ -312,11 +315,12 @@ public class JasminGenerator {
             return generateArrayAssign(assign);
         }
 
+        /*
         if(assign.getRhs().getInstType() == InstructionType.BINARYOPER){
             var iinc = generateIncAssign(assign);
             if (iinc != "") return iinc;
         }
-
+    */
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
@@ -456,6 +460,9 @@ public class JasminGenerator {
                 break;
             case LTH:
                 op.append("if_icmplt");
+                break;
+            case GTE:
+                op.append("if_icmpte");
                 break;
             default:
                 throw new NotImplementedException(binaryOp.getOperation().getOpType());
