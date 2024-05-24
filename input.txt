@@ -1,17 +1,10 @@
-import ioPlus;
-class SimpleWhileStat {
+class PropSimple {
+    public int foo(){
+	  int a;
+	  a = 10;
+	  return a;
+	}
+    public static void main(String[] args) {
 
-
-    public boolean func(int a){
-        boolean c;
-        int i;
-        i = 7;
-
-        c = true && 7 < 5;
-
-
-
-        return c;
     }
-
 }
