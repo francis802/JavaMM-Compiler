@@ -21,12 +21,19 @@ public class ConstantPropagation {
             for (var value : constants.entrySet()) {
                 value.getValue().detach();
             }
-            for (var key : constants.keySet()) {
-                var varDecls = method.getChildren(Kind.VAR_DECL);
-                for (var varDecl : varDecls) {
-                    if (varDecl.get("name").equals(key)) {
-                        varDecl.detach();
+            var varDecls = method.getChildren(Kind.VAR_DECL);
+            var assignStmts = method.getDescendants(Kind.ASSIGN_STMT);
+            boolean found;
+            for (var varDecl : varDecls) {
+                found = false;
+                for (var assignStmt : assignStmts) {
+                    if (assignStmt.getJmmChild(0).get("name").equals(varDecl.get("name"))) {
+                        found = true;
+                        break;
                     }
+                }
+                if (!found) {
+                    varDecl.detach();
                 }
             }
             constants.clear();
@@ -38,15 +45,17 @@ public class ConstantPropagation {
     }
 
     private void propagateConstants(JmmNode node) {
-        if (isVariableUsage(node)) {
+        boolean childrenPropagated = false;
+
+         if (isVariableUsage(node)) {
             String variable = getVariableName(node);
-            if (constants.containsKey(variable)) {
+            if (constants.containsKey(variable) && !usedInLoop(node)) {
                 JmmNode constantIntNode = getConstantValue(constants.get(variable));
                 System.out.println("Replacing " + variable + " with " + constantIntNode.get("value"));
                 replaceWithConstant(node, constantIntNode);
             }
         }
-        if (isIntegerAssignment(node)) {
+        else if (isIntegerAssignment(node)) {
             System.out.println("Found integer assignment");
             String variable = getAssignedVariable(node);
             if (constants.containsKey(variable)) {
@@ -56,9 +65,60 @@ public class ConstantPropagation {
             }
             constants.put(variable, node);
         }
-        for (JmmNode child : node.getChildren()) {
-            propagateConstants(child);
+        else if (isAssignedVariable(node)) {
+             for (JmmNode child : node.getChildren()) {
+                 propagateConstants(child);
+             }
+             childrenPropagated = true;
+            System.out.println("Found variable assignment, but not to a simple primitive value");
+            String variable = getAssignedVariable(node);
+            constants.remove(variable);
         }
+        if (!childrenPropagated) {
+            for (JmmNode child : node.getChildren()) {
+                propagateConstants(child);
+            }
+        }
+    }
+
+    private boolean usedInLoop(JmmNode node) {
+        if(node.getAncestor(Kind.WHILE_STMT).isPresent()) {
+            var loop = node.getAncestor(Kind.WHILE_STMT).get();
+            var assignStmts = loop.getDescendants(Kind.ASSIGN_STMT);
+            for (var assignStmt : assignStmts) {
+                if (assignStmt.getJmmChild(0).get("name").equals(node.get("name"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isSelfAssignment(JmmNode node) {
+        if(Kind.ASSIGN_STMT.check(node)) {
+            JmmNode left = node.getJmmChild(0);
+            if (!Kind.VAR_REF_EXPR.check(left)) {
+                return false;
+            }
+            JmmNode right = node.getJmmChild(1);
+            if(!Kind.VAR_REF_EXPR.check(right)){
+                var varRefs = right.getDescendants(Kind.VAR_REF_EXPR);
+                for (var varRef : varRefs) {
+                    if (varRef.get("name").equals(left.get("name"))) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            else {
+                return right.get("name").equals(left.get("name"));
+            }
+        }
+        return false;
+    }
+
+    private boolean isAssignedVariable(JmmNode node) {
+        return Kind.ASSIGN_STMT.check(node) && constants.containsKey(node.getJmmChild(0).get("name"));
     }
 
     private boolean isIntegerAssignment(JmmNode node) {
