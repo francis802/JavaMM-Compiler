@@ -8,6 +8,7 @@ import pt.up.fe.comp.jmm.parser.JmmParserResult;
 import pt.up.fe.comp2024.analysis.JmmAnalysisImpl;
 import pt.up.fe.comp2024.backend.JasminBackendImpl;
 import pt.up.fe.comp2024.optimization.JmmOptimizationImpl;
+import pt.up.fe.comp2024.optimization_jasmin.AstToJasminImpl;
 import pt.up.fe.comp2024.parser.JmmParserImpl;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsSystem;
@@ -40,9 +41,10 @@ public class Launcher {
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         TestUtils.noErrors(semanticsResult.getReports());
 
-
         // Optimization stage
         JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+        // -o optimization flag
+        semanticsResult = ollirGen.optimize(semanticsResult);
         OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
 

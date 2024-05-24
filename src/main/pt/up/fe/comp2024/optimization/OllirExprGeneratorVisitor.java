@@ -20,12 +20,23 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
     private static final String SPACE = " ";
     private static final String ASSIGN = ":=";
+    private static final String NL = "\n";
     private final String END_STMT = ";\n";
 
     private final SymbolTable table;
+    private static int logicalAndCounter = 0;
+    private static int trueFalseCounter = 0;
 
     public OllirExprGeneratorVisitor(SymbolTable table) {
         this.table = table;
+    }
+
+    private static int getNewAndCounter(){
+        return logicalAndCounter++;
+    }
+
+    private static int getNewTrueFalseCounter(){
+        return trueFalseCounter++;
     }
 
     @Override
@@ -177,6 +188,16 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
 
 
     private OllirExprResult visitBinExpr(JmmNode node, Void unused) {
+        boolean logicalAndExpr = node.get("op").equals("&&");
+        if (logicalAndExpr){
+            int trueFalseCounter = getNewTrueFalseCounter();
+            OllirExprResult ollir = visitLogicalAnd(node, trueFalseCounter);
+            String resComp = ollir.getComputation();
+            StringBuilder finalComp = new StringBuilder();
+            finalComp.append(resComp);
+            finalComp.append("ENDAND_").append(trueFalseCounter).append(":").append(NL);
+            return new OllirExprResult(ollir.getCode(), finalComp);
+        }
 
         var lhs = visit(node.getJmmChild(0));
         var rhs = visit(node.getJmmChild(1));
@@ -200,6 +221,36 @@ public class OllirExprGeneratorVisitor extends PreorderJmmVisitor<Void, OllirExp
         computation.append(node.get("op")).append(OptUtils.toOllirType(type)).append(SPACE)
                 .append(rhs.getCode()).append(END_STMT);
 
+        return new OllirExprResult(code, computation);
+    }
+
+    private OllirExprResult visitLogicalAnd(JmmNode node, int trueFalseCounter){
+        var rhs = visit(node.getJmmChild(1));
+        var lhsNode = node.getJmmChild(0);
+        OllirExprResult lhs;
+        if (PARENTHESIS.check(lhsNode)){
+            lhsNode = getOffParenthesis(lhsNode);
+        }
+        if (BINARY_EXPR.check(lhsNode) && lhsNode.get("op").equals("&&")){
+            lhs = visitLogicalAnd(lhsNode, trueFalseCounter);
+        }
+        else {
+            lhs = visit(lhsNode);
+        }
+        StringBuilder computation = new StringBuilder();
+        int andCounter = getNewAndCounter();
+        computation.append(rhs.getComputation());
+        computation.append(lhs.getComputation());
+        String temp = OptUtils.getTemp();
+        String type = ".bool";
+        String code = temp + type;
+        computation.append("if (").append(rhs.getCode()).append(") goto AND_").append(andCounter).append(END_STMT);
+        computation.append(code).append(SPACE).append(ASSIGN).append(".bool").append(SPACE).append("false.bool").append(END_STMT);
+        computation.append("goto ENDAND_").append(trueFalseCounter).append(END_STMT);
+        computation.append("AND_").append(andCounter).append(":").append(NL);
+        computation.append(temp).append(type).append(SPACE);
+        computation.append(ASSIGN).append(type).append(SPACE);
+        computation.append(lhs.getCode()).append(END_STMT);
         return new OllirExprResult(code, computation);
     }
 

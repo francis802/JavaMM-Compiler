@@ -47,7 +47,7 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         addVisit(RETURN_STMT, this::visitReturn);
         addVisit(ASSIGN_STMT, this::visitAssignStmt);
         addVisit(FUNCTION_CALL, this::visitFunctionCall);
-        //addVisit(CONDITIONAL_STMT, this::visitConditionStmt);
+        addVisit(CONDITIONAL_STMT, this::visitConditionStmt);
         addVisit(WHILE_STMT, this::visitWhileStmt);
         addVisit(PARENTHESIS, this::visitExprStatement);
         addVisit(CURLY_STMT, this::visitExprStatement);
@@ -102,6 +102,24 @@ public class OllirGeneratorVisitor extends AJmmVisitor<Void, String> {
         code.append("if (").append(condition.getCode()).append(") goto ENDLOOP_").append(loopNumber).append(END_STMT);
         code.append(stmt);
         code.append("goto LOOP_").append(loopNumber).append(END_STMT);
+        code.append("ENDLOOP_").append(loopNumber).append(": \n");
+        return code.toString();
+    }
+
+    private String visitConditionStmt(JmmNode node, Void unused) {
+        StringBuilder code = new StringBuilder();
+        var condition = exprVisitor.visit(node.getJmmChild(0).getJmmChild(0));
+        var ifStmt = visit(node.getJmmChild(0).getJmmChild(1));
+        var elseStmt = visit(node.getJmmChild(1).getJmmChild(0));
+        int ifNumber = getIfNumber();
+        code.append(condition.getComputation());
+        code.append("if (").append(condition.getCode()).append(") goto IF_").append(ifNumber).append(END_STMT);
+        code.append(elseStmt);
+        code.append("goto ENDIF_").append(ifNumber).append(END_STMT);
+        code.append("IF_").append(ifNumber).append(": \n");
+        code.append(ifStmt);
+        code.append("ENDIF_").append(ifNumber).append(": \n");
+
         return code.toString();
     }
 
