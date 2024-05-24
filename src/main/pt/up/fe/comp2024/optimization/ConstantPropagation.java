@@ -56,12 +56,12 @@ public class ConstantPropagation {
          if (isVariableUsage(node)) {
             String variable = getVariableName(node);
             if (constants.containsKey(variable) && !usedInLoop(node)) {
-                JmmNode constantIntNode = getConstantValue(constants.get(variable));
-                replaceWithConstant(node, constantIntNode);
+                JmmNode constantNode = getConstantValue(constants.get(variable));
+                replaceWithConstant(node, constantNode);
                 isChanged = true;
             }
         }
-        else if (isIntegerAssignment(node)) {
+        else if (isIntegerAssignment(node) || isBooleanAssignment(node)) {
             String variable = getAssignedVariable(node);
             if (constants.containsKey(variable)) {
                 JmmNode nodeToRemove = constants.get(variable);
@@ -108,6 +108,10 @@ public class ConstantPropagation {
         return Kind.ASSIGN_STMT.check(node) && Kind.INTEGER_LITERAL.check(node.getJmmChild(1));
     }
 
+    private boolean isBooleanAssignment(JmmNode node) {
+        return Kind.ASSIGN_STMT.check(node) && (Kind.TRUE_LITERAL.check(node.getJmmChild(1)) || Kind.FALSE_LITERAL.check(node.getJmmChild(1)));
+    }
+
     private String getAssignedVariable(JmmNode node) {
         return node.getJmmChild(0).get("name");
     }
@@ -127,9 +131,9 @@ public class ConstantPropagation {
         return node.get("name");
     }
 
-    private void replaceWithConstant(JmmNode node, JmmNode constantIntNode) {
-        JmmNode newNode = constantIntNode.copy();
-        newNode.put("value", constantIntNode.get("value"));
+    private void replaceWithConstant(JmmNode node, JmmNode constantNode) {
+        JmmNode newNode = constantNode.copy();
+        newNode.put("value", constantNode.get("value"));
         node.replace(newNode);
     }
 }

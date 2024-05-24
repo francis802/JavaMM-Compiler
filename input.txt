@@ -1,14 +1,13 @@
 class PropWithLoop {
-    public int foo(){
-	  int a;
-	  int i;
-	  a = 0;
-	  i = a + 1;
-	  i = i + 3;
-	  a = i*4;
-	  i = a / 1;
-	  i = i - 1;
-	  a = a + i;
+    public boolean foo(){
+	  boolean a;
+	  boolean i;
+	  boolean c;
+	  i = true;
+	  a = 1 < 5 && 5 < 10;
+	  i = i && false;
+	  a = a && i;
+	  a = !a;
 	  return a;
 	}
 	public static void main(String[] args) {
