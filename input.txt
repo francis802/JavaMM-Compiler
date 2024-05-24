@@ -1,15 +1,13 @@
-class PropWithLoop {
-    public boolean foo(){
-	  boolean a;
-	  boolean i;
-	  boolean c;
-	  i = true;
-	  a = 1 < 5 && 5 < 10;
-	  i = i && false;
-	  a = a && i;
-	  a = !a;
-	  return a;
+class ComplexArrayAccess {
+    public int foo(int... a){
+      int[] m;
+      m = [[1],[2],[3],[4]];
+	  return m[a[0]][0];
 	}
+
 	public static void main(String[] args) {
+	    ComplexArrayAccess caa;
+	    caa = new ComplexArrayAccess();
+	    caa.foo(2);
 	}
 }

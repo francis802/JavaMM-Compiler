@@ -39,7 +39,16 @@ public class TypeUtils {
             case FUNCTION_CALL -> getFunctionCallType(expr, table);
             case OBJECT_DECLARATION -> new Type(expr.get("name"), false);
             case ARRAY_DECLARATION -> new Type(expr.getJmmChild(0).get("name"), true);
-            case ARRAY_SUBS -> new Type(getExprType(expr.getJmmChild(0),table).getName(), false);
+            case ARRAY_SUBS -> {
+                Type arrayType = getExprType(expr.getJmmChild(0),table);
+                if (ARRAY_SUBS.check(expr.getParent())) {
+                    // If the accessed array is itself an array, then the result of the array access operation is still an array
+                    yield new Type(arrayType.getName(), true);
+                } else {
+                    // If the accessed array is not an array, then the result of the array access operation is not an array
+                    yield new Type(arrayType.getName(), false);
+                }
+            }
             case DESCRIBED_ARRAY -> new Type(INT_TYPE_NAME, true);
             case ASSIGN_STMT, PARENTHESIS -> getExprType(expr.getJmmChild(0), table);
             case OBJECT -> new Type(table.getClassName(), false);

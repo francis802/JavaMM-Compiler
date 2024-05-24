@@ -8,13 +8,13 @@
 
 ## Work Distribution
 
-- Francisco Campos -  %
-- Henrique Pinheiro -  %
-- Sofia Moura -  %
+- Francisco Campos -  40%
+- Henrique Pinheiro -  33%
+- Sofia Moura -  27%
 
 ## Self-Assessment
-We think our project deserves a 18.
+We think our project deserves a 19.
 
 ## Extra Elements
 In java, sometimes to fetch attributes belonging to a class we use a prefix "this." followed by the name of the variable.
-We realised that this wasn't possible, so we implemented this possibility in the Ollir part.
+We realised that this wasn't possible in Java--, so we implemented this possibility in the Ollir part.
