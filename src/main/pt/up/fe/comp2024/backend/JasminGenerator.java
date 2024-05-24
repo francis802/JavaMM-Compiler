@@ -711,6 +711,7 @@ public class JasminGenerator {
         }
         else{
             code.append(generators.apply(cond) + "ifne " + instruction.getLabel());
+            subtoStackValue(1);
         }
 
         return code.toString();
@@ -728,6 +729,7 @@ public class JasminGenerator {
         }
 
         code.append(generated_code + operation_text);
+        subtoStackValue(1);
         return code.toString();
     }
 
@@ -778,6 +780,8 @@ public class JasminGenerator {
                 break;
         }
         code.append(generated_code + operation_text);
+        if(operation_text.equals("if_icmpge ") || (operation_text.equals("if_icmplt")) )subtoStackValue(2);
+        else subtoStackValue(1);
         return code.toString();
     }
 
