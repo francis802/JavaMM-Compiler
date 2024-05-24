@@ -41,14 +41,10 @@ public class Launcher {
         JmmSemanticsResult semanticsResult = sema.semanticAnalysis(parserResult);
         TestUtils.noErrors(semanticsResult.getReports());
 
-        // Optimization -o
-        if (config.get("optimize").equals("true")) {
-            AstToJasminImpl opt = new AstToJasminImpl();
-            semanticsResult = opt.optimize(semanticsResult);
-        }
-
         // Optimization stage
         JmmOptimizationImpl ollirGen = new JmmOptimizationImpl();
+        // -o optimization flag
+        semanticsResult = ollirGen.optimize(semanticsResult);
         OllirResult ollirResult = ollirGen.toOllir(semanticsResult);
         TestUtils.noErrors(ollirResult.getReports());
 

@@ -1,7 +1,12 @@
 class PropSimple {
     public int foo(){
 	  int a;
+	  int b;
 	  a = 10;
+	  a=5;
+	  a=6;
+	  b=a;
+	  a=3;
 	  return a;
 	}
     public static void main(String[] args) {

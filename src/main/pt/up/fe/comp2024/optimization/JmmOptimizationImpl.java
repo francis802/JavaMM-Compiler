@@ -25,4 +25,15 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
         return ollirResult;
     }
+
+    @Override
+    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
+        if(semanticsResult.getConfig().containsKey("optimize") && semanticsResult.getConfig().get("optimize").equals("true")) {
+            //TODO: More loops and constant folding
+            ConstantPropagation constantPropagation = new ConstantPropagation();
+            return constantPropagation.optimize(semanticsResult);
+        }
+        return semanticsResult;
+    }
+
 }
