@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import org.antlr.v4.runtime.misc.Pair;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ast.JmmNode;
 import pt.up.fe.comp2024.ast.Kind;
@@ -7,78 +8,83 @@ import pt.up.fe.comp2024.ast.Kind;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class ConstantPropagation {
     private final Map<String, JmmNode> constants = new HashMap<>();
 
-    //TODO: Case where i = i + CONSTANT (loop or no loop)
+    public Pair<JmmSemanticsResult,Boolean> optimize(JmmSemanticsResult semanticsResult) {
 
-    public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
         JmmNode root = semanticsResult.getRootNode();
         List<JmmNode> methods = root.getDescendants(Kind.METHOD_DECL);
+        boolean isChanged = false;
         for (JmmNode method : methods) {
-            propagateConstants(method);
-            for (var value : constants.entrySet()) {
-                value.getValue().detach();
-            }
+            isChanged = isChanged || propagateConstants(method);
+            var varRefExprs = method.getDescendants(Kind.VAR_REF_EXPR);
             var varDecls = method.getChildren(Kind.VAR_DECL);
-            var assignStmts = method.getDescendants(Kind.ASSIGN_STMT);
             boolean found;
             for (var varDecl : varDecls) {
                 found = false;
-                for (var assignStmt : assignStmts) {
-                    if (assignStmt.getJmmChild(0).get("name").equals(varDecl.get("name"))) {
+                for (var varRef : varRefExprs) {
+                    if (varRef.get("name").equals(varDecl.get("name"))){
                         found = true;
-                        break;
+                        if (constants.get(varRef.get("name")) != null && constants.get(varRef.get("name")).equals(varRef.getParent())){
+                            found = false;
+                        }
+                        else {
+                            break;
+                        }
                     }
                 }
                 if (!found) {
                     varDecl.detach();
+                    for (var key : constants.keySet()) {
+                        if (Objects.equals(key, varDecl.get("name"))) {
+                            constants.get(key).detach();
+                        }
+                    }
                 }
             }
             constants.clear();
         }
-
-        System.out.println(root.toTree());
-
-        return semanticsResult;
+        return new Pair<>(semanticsResult, isChanged);
     }
 
-    private void propagateConstants(JmmNode node) {
-        boolean childrenPropagated = false;
+    private boolean propagateConstants(JmmNode node) {
+        boolean isChanged = false;
 
          if (isVariableUsage(node)) {
             String variable = getVariableName(node);
             if (constants.containsKey(variable) && !usedInLoop(node)) {
                 JmmNode constantIntNode = getConstantValue(constants.get(variable));
-                System.out.println("Replacing " + variable + " with " + constantIntNode.get("value"));
                 replaceWithConstant(node, constantIntNode);
+                isChanged = true;
             }
         }
         else if (isIntegerAssignment(node)) {
-            System.out.println("Found integer assignment");
             String variable = getAssignedVariable(node);
             if (constants.containsKey(variable)) {
                 JmmNode nodeToRemove = constants.get(variable);
                 nodeToRemove.detach();
                 constants.remove(variable);
+                isChanged = true;
             }
             constants.put(variable, node);
         }
         else if (isAssignedVariable(node)) {
              for (JmmNode child : node.getChildren()) {
-                 propagateConstants(child);
+                 isChanged = isChanged || propagateConstants(child);
              }
-             childrenPropagated = true;
-            System.out.println("Found variable assignment, but not to a simple primitive value");
-            String variable = getAssignedVariable(node);
-            constants.remove(variable);
+             var varRefExprs = node.getJmmChild(1).getDescendants(Kind.VAR_REF_EXPR);
+             if (!varRefExprs.isEmpty() && !Kind.VAR_REF_EXPR.check(node.getJmmChild(1))) {
+                 String variable = getAssignedVariable(node);
+                 constants.remove(variable);
+             }
         }
-        if (!childrenPropagated) {
-            for (JmmNode child : node.getChildren()) {
-                propagateConstants(child);
-            }
+        for (JmmNode child : node.getChildren()) {
+            isChanged = isChanged || propagateConstants(child);
         }
+        return isChanged;
     }
 
     private boolean usedInLoop(JmmNode node) {
@@ -89,29 +95,6 @@ public class ConstantPropagation {
                 if (assignStmt.getJmmChild(0).get("name").equals(node.get("name"))) {
                     return true;
                 }
-            }
-        }
-        return false;
-    }
-
-    private boolean isSelfAssignment(JmmNode node) {
-        if(Kind.ASSIGN_STMT.check(node)) {
-            JmmNode left = node.getJmmChild(0);
-            if (!Kind.VAR_REF_EXPR.check(left)) {
-                return false;
-            }
-            JmmNode right = node.getJmmChild(1);
-            if(!Kind.VAR_REF_EXPR.check(right)){
-                var varRefs = right.getDescendants(Kind.VAR_REF_EXPR);
-                for (var varRef : varRefs) {
-                    if (varRef.get("name").equals(left.get("name"))) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-            else {
-                return right.get("name").equals(left.get("name"));
             }
         }
         return false;

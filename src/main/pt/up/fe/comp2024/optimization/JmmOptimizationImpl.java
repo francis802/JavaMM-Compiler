@@ -1,5 +1,6 @@
 package pt.up.fe.comp2024.optimization;
 
+import org.antlr.v4.runtime.misc.Pair;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -28,12 +29,26 @@ public class JmmOptimizationImpl implements JmmOptimization {
 
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
-        if(semanticsResult.getConfig().containsKey("optimize") && semanticsResult.getConfig().get("optimize").equals("true")) {
-            //TODO: More loops and constant folding
-            ConstantPropagation constantPropagation = new ConstantPropagation();
-            return constantPropagation.optimize(semanticsResult);
+        JmmSemanticsResult newSemanticsResult = semanticsResult;
+        boolean isChangedPropagate = true;
+        boolean isChangedFold = true;
+        if(newSemanticsResult.getConfig().containsKey("optimize") && newSemanticsResult.getConfig().get("optimize").equals("true")) {
+            System.out.println("-o OPTIMIZATION STARTED");
+            System.out.println(newSemanticsResult.getRootNode().toTree());
+            while (isChangedPropagate || isChangedFold) {
+                ConstantPropagation constantPropagation = new ConstantPropagation();
+                Pair<JmmSemanticsResult,Boolean> resultPropagate = constantPropagation.optimize(newSemanticsResult);
+                newSemanticsResult = resultPropagate.a;
+                ConstantFolding constantFolding = new ConstantFolding();
+                Pair<JmmSemanticsResult,Boolean> resultFold = constantFolding.optimize(newSemanticsResult);
+                newSemanticsResult = resultFold.a;
+                isChangedPropagate = resultPropagate.b;
+                isChangedFold = resultFold.b;
+            }
+            System.out.println("-o OPTIMIZATION FINISHED");
+            System.out.println(newSemanticsResult.getRootNode().toTree());
         }
-        return semanticsResult;
+        return newSemanticsResult;
     }
 
 }

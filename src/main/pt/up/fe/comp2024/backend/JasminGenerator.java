@@ -454,6 +454,9 @@ public class JasminGenerator {
             case ORB:
                 op.append("ior");
                 break;
+            case LTH:
+                op.append("if_icmplt");
+                break;
             default:
                 throw new NotImplementedException(binaryOp.getOperation().getOpType());
         }

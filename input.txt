@@ -1,15 +1,16 @@
-class PropSimple {
+class PropWithLoop {
     public int foo(){
 	  int a;
-	  int b;
-	  a = 10;
-	  b = a;
-	  a = 5;
-	  b = 4;
-
+	  int i;
+	  a = 0;
+	  i = a + 1;
+	  i = i + 3;
+	  a = i*4;
+	  i = a / 1;
+	  i = i - 1;
+	  a = a + i;
 	  return a;
 	}
-    public static void main(String[] args) {
-
-    }
+	public static void main(String[] args) {
+	}
 }
