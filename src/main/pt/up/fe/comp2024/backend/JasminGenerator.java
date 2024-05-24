@@ -60,11 +60,11 @@ public class JasminGenerator {
         generators.put(PutFieldInstruction.class, this::generatePutField);
         generators.put(GetFieldInstruction.class, this::generateGetField);
         generators.put(CallInstruction.class, this::generateCall);
-        generators.put(SingleOpCondInstruction.class, this::generateSingleOpCond);
         generators.put(GotoInstruction.class, this::generateGoto);
-        generators.put(OpCondInstruction.class, this::generateOpCond);
+        generators.put(CondBranchInstruction.class, this::generateBranch);
         generators.put(UnaryOpInstruction.class, this::generateUnaryOp);
     }
+
 
 
 
@@ -271,6 +271,12 @@ public class JasminGenerator {
         maxStackSize = 0;
         currentStackSize = 0;
         for (var inst : method.getInstructions()) {
+            for(var label : currentMethod.getLabels().entrySet()){
+                if(label.getValue() == inst){
+                    methods_code.append(" " + label.getKey() + ":" + NL);
+                }
+            }
+
             var instCode = StringLines.getLines(generators.apply(inst)).stream()
                     .collect(Collectors.joining(NL + TAB, TAB, NL));
 
@@ -314,6 +320,11 @@ public class JasminGenerator {
         if(assign.getDest() instanceof ArrayOperand){
             return generateArrayAssign(assign);
         }
+
+        if(assign.getRhs().getInstType() == InstructionType.BINARYOPER){
+
+        }
+
         // generate code for loading what's on the right
         code.append(generators.apply(assign.getRhs()));
 
@@ -672,37 +683,100 @@ public class JasminGenerator {
         return code.toString();
     }
 
-    private String generateSingleOpCond(SingleOpCondInstruction instruction){
+    private String generateBranch(CondBranchInstruction instruction){
         StringBuilder code = new StringBuilder();
-        var info = "";
-        info += "A";
+        var cond =  instruction.getCondition();
+        String condition_text;
+        String s2;
 
-        return "SingleOpCondition";
-    }
-
-    private String generateGoto(GotoInstruction instruction){
-        StringBuilder code = new StringBuilder();
-        var temp = ((Instruction) instruction);
-        code.append("goto " + instruction.getLabel());
-        return code.toString();
-    }
-
-    private String generateOpCond(OpCondInstruction instruction){
-        StringBuilder code = new StringBuilder();
-
-        var first_part = generateBinaryOp(((BinaryOpInstruction) instruction.getCondition()));
-        code.append(first_part);
-
-        switch (((BinaryOpInstruction) instruction.getCondition()).getOperation().getOpType()){
-            case LTH:
-                code.append("iflt cmp_lt_" + instruction.getLabel());
-                break;
-            default:
-                code.append("YET");
+        if (cond.getInstType() == InstructionType.UNARYOPER){
+            var uni_code = getUnaryOp((UnaryOpInstruction) cond);
+            code.append(uni_code + " " + instruction.getLabel());
+        }
+        else if (cond.getInstType() == InstructionType.BINARYOPER){
+            var bin_code = getBinaryOp((BinaryOpInstruction) cond);
+            code.append(bin_code + " " + instruction.getLabel());
+        }
+        else{
+            code.append(generators.apply(cond) + "ifne " + instruction.getLabel());
         }
 
         return code.toString();
     }
+
+
+    private String getUnaryOp(UnaryOpInstruction uni_cond){
+        var code = new StringBuilder();
+        String operation_text = "";
+        String generated_code  = "";
+
+        if(uni_cond.getOperation().getOpType() == OperationType.NOTB){
+            generated_code = generators.apply(uni_cond.getOperand());
+            operation_text = "ifeq ";
+        }
+
+        code.append(generated_code + operation_text);
+        return code.toString();
+    }
+
+    private String getBinaryOp (BinaryOpInstruction bin_op){
+        var code = new StringBuilder();
+        Integer literal = null;
+        String operation_text = "";
+        String generated_code  = "";
+
+        switch(bin_op.getOperation().getOpType()){
+            case LTH:
+                if(bin_op.getRightOperand() instanceof LiteralElement){
+                    literal = Integer.parseInt(((LiteralElement) bin_op.getRightOperand()).getLiteral());
+                    generated_code = generators.apply(bin_op.getLeftOperand());
+                    operation_text = "iflt ";
+                }
+                if(bin_op.getLeftOperand() instanceof LiteralElement){
+                    literal = Integer.parseInt(((LiteralElement) bin_op.getLeftOperand()).getLiteral());
+                    generated_code = generators.apply(bin_op.getRightOperand());
+                    operation_text = "ifgt ";
+                }
+                if (literal == null || literal != 0){
+                    generated_code = generators.apply(bin_op.getLeftOperand()) + generators.apply(bin_op.getRightOperand());
+                    operation_text = "if_icmplt";
+                }
+                break;
+            case GTE:
+                if(bin_op.getRightOperand() instanceof LiteralElement){
+                    literal = Integer.parseInt(((LiteralElement) bin_op.getRightOperand()).getLiteral());
+                    generated_code = generators.apply(bin_op.getLeftOperand());
+                    operation_text = "ifle ";
+                }
+                if(bin_op.getLeftOperand() instanceof LiteralElement){
+                    literal = Integer.parseInt(((LiteralElement) bin_op.getLeftOperand()).getLiteral());
+                    generated_code = generators.apply(bin_op.getRightOperand());
+                    operation_text = "ifge ";
+                }
+                if (literal == null || literal != 0){
+                    generated_code = generators.apply(bin_op.getLeftOperand()) + generators.apply(bin_op.getRightOperand());
+                    operation_text = "if_icmpge ";
+                }
+                break;
+            case ANDB:
+                generated_code = generators.apply(bin_op.getLeftOperand()) + generators.apply(bin_op.getRightOperand());
+                operation_text = "ifne ";
+                break;
+            default:
+                break;
+        }
+        code.append(generated_code + operation_text);
+        return code.toString();
+    }
+
+
+    private String generateGoto(GotoInstruction instruction){
+        StringBuilder code = new StringBuilder();
+        code.append("goto " + instruction.getLabel());
+        return code.toString();
+    }
+
+
 
     private String generateUnaryOp(UnaryOpInstruction instruction){
         var code = new StringBuilder();
@@ -715,14 +789,13 @@ public class JasminGenerator {
         var op_type = instruction.getOperation().getOpType();
         switch (op_type){
             case NOTB:
-
                 code.append("ixor");
                 break;
             default:
                 code.append("Yet");
         }
 
-        return code.toString() +NL;
+        return code.toString() + NL;
     }
 
 }
